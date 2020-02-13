@@ -1,0 +1,2 @@
+include ':app', ':userreport'
+project(':userreport').projectDir = new File(rootProject.projectDir, "../Userreport-survey/userreport")

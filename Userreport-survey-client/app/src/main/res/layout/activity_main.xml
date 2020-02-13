@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrlLogsView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/activity_main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        tools:context="com.userreport.android.surveyclient.MainActivity"
+        tools:ignore="HardcodedText">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/localQuarantineDays"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="localQuarantineDays: " />
+
+            <TextView
+                android:id="@+id/inviteAfterNSecondsInApp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="inviteAfterNSecondsInApp: " />
+
+            <TextView
+                android:id="@+id/inviteAfterTotalScreensViewed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="inviteAfterTotalScreensViewed: " />
+
+            <TextView
+                android:id="@+id/sessionScreensView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="sessionScreensView: " />
+
+            <TextView
+                android:id="@+id/sessionNSecondsLength"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="sessionNSecondsLength: " />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/track_screen_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="trackScreen"
+                android:text="Track screen" />
+
+            <Button
+                android:id="@+id/track_section_screen_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="trackSectionScreen"
+                android:text="Track section screen" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="clearLocalQuarantineButtonClick"
+                    android:text="Clear lq" />
+
+                <Switch
+                    android:id="@+id/switch1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Test mode" />
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnStart"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onStartActivity_Click"
+                android:text="Open activity" />
+
+            <Button
+                android:id="@+id/btnSetEmail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="btnSetEmail_Click"
+                android:text="Set Email" />
+
+            <EditText
+                android:id="@+id/email_text_input"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="email"
+                android:importantForAutofill="no"
+                android:inputType="textEmailAddress" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="btnClearLog_Click"
+                android:text="Clear Log" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="btnTryInvite_Click"
+                android:text="Try Invite" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txtServerLog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

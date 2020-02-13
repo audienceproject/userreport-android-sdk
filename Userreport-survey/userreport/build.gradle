@@ -1,0 +1,179 @@
+apply plugin: 'com.android.library'
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+ext {
+    output = project.hasProperty('output') ? project.getProperty('output') : System.env.output
+
+    repositorySnapshot = project.hasProperty('repositorySnapshot') ? project.getProperty('repositorySnapshot') : System.env.repositorySnapshot
+    repositoryRelease = project.hasProperty('repositoryRelease') ? project.getProperty('repositoryRelease') : System.env.repositoryRelease
+    repositoryUsername = project.hasProperty('repositoryUsername') ? project.getProperty('repositoryUsername') : System.env.repositoryUsername
+    repositoryPassword = project.hasProperty('repositoryPassword') ? project.getProperty('repositoryPassword') : System.env.repositoryPassword
+
+    buildVersion = project.hasProperty('buildVersion') ? project.getProperty('buildVersion') : "0"
+}
+
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion '29.0.2'
+
+    println "(debug) version: $project.buildVersion"
+
+    defaultConfig {
+        defaultPublishConfig 'release'
+        minSdkVersion 19
+        targetSdkVersion 29
+        versionCode = project.buildVersion.toInteger()
+        versionName "0.0.1.$project.buildVersion"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    sourceSets {
+        release.res.srcDirs = ['src/release/res']
+    }
+
+    buildTypes {
+        debug {
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+
+
+    if (project.output != null) {
+        def fileName = "${archivesBaseName}-${defaultConfig.versionName}.aar"
+
+        println "(debug) project.output: $project.output"
+        println "(debug) file name: $fileName"
+
+      libraryVariants.all { variant ->
+          variant.outputs.each { output ->
+              output.outputFileName = new File(project.output, fileName)
+          }
+      }
+    }
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+
+    from javadoc.destinationDir
+
+    if (project.output != null) {
+        destinationDir = file(project.output)
+    }
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+
+    from android.sourceSets.main.java.srcDirs
+
+    if (project.output != null) {
+        destinationDir = file(project.output)
+    }
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+def getNexusMavenRepositoryUrl(String version) {
+    def repositoryUrl
+
+    println "(debug) $version"
+
+    if (version.toLowerCase().contains("snapshot")) {
+        repositoryUrl = project.repositorySnapshot
+    } else {
+        repositoryUrl = project.repositoryRelease
+    }
+
+    return repositoryUrl
+}
+
+group = 'com.audienceproject'
+version = android.defaultConfig.versionName
+
+uploadArchives {
+    configurations.archives.allArtifacts.getFiles().each { file -> println "(debug) archive: " + file }
+
+    repositories {
+        //flatDir {
+        //  dirs "d:/temp/gradle"
+        //}
+
+
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: project.repositoryRelease) {
+                authentication(userName: project.repositoryUsername, password: project.repositoryPassword)
+            }
+            snapshotRepository(url: project.repositorySnapshot) {
+                authentication(userName: project.repositoryUsername, password: project.repositoryPassword)
+            }
+
+            println "(debug) project name: $project.name"
+
+            pom.artifactId = project.name
+
+            pom.project {
+                name 'UserReport Android SDK'
+                description 'Brings UserReport capabilities in native Android application – Surveys and Audience Measurement'
+                url 'https://www.userreport.com/'
+
+                packaging 'aar'
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        name 'UserReport Support'
+                        email 'support@userreport.com'
+                        organization 'AudienceProject'
+                        organizationUrl 'http://www.audienceproject.com'
+                    }
+                }
+
+                scm {
+                    connection 'scm:git:git://github.com/audienceproject/userreport-android-sdk.git'
+                    developerConnection 'scm:git:ssh://github.com/audienceproject/userreport-android-sdk.git'
+                    url 'https://github.com/audienceproject/userreport-android-sdk'
+                }
+            }
+        }
+    }
+}
+
+signing {
+    sign configurations.archives
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.google.android.gms:play-services-ads:18.3.0'
+    implementation 'com.android.volley:volley:1.1.1'
+    implementation 'androidx.browser:browser:1.2.0'
+}
