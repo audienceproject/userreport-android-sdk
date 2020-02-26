@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
         settings.setLocalQuarantineDays(10);
 
         UserReportBuilder builder = new UserReportBuilder("audienceproject",
-                "8ad25ee8-595c-4f79-8a05-37dc3fe5c0cd")
+                "8aa7a61b-5c16-40c4-9b9e-c5ba641a160b")
                 .setLogger(logger)
                 .setSettings(settings)
                 .setSurveyFinished(() -> new Handler(Looper.getMainLooper()).post(() ->
