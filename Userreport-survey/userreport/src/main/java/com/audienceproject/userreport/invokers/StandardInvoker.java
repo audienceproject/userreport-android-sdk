@@ -85,14 +85,12 @@ public class StandardInvoker implements ISurveyInvoker, Application.ActivityLife
             public void run() {
                 try {
                     while (!isInterrupted() && !alreadyInvited) {
-                        Log.d("Thread.", "Iteration");
                         Thread.sleep(1000);
                         new Handler(Looper.getMainLooper()).post(() -> {
                             if (rulesInitialized) {
                                 boolean allTriggered = true;
                                 for (IInvitationRule rule : allRules) {
                                     boolean isRuleTriggered = rule.isTriggered();
-                                    System.out.println(isRuleTriggered + " " + rule.getClass().getSimpleName());
                                     allTriggered = allTriggered && isRuleTriggered;
                                 }
 
