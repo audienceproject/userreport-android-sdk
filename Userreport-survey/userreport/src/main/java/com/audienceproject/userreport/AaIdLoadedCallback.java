@@ -1,6 +1,6 @@
 package com.audienceproject.userreport;
 
-interface IAaIdLoadedCallback {
+interface AaIdLoadedCallback {
     void onSuccess(String aaid);
     void onFailed(Exception e);
 }

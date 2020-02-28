@@ -3,7 +3,7 @@ package com.audienceproject.userreport.rules;
 import com.audienceproject.userreport.models.Session;
 
 // Counts total screen changed during all user sessions
-public class TotalScreensChangeInAppRule implements IInvitationRule<Integer> {
+public class TotalScreensChangeInAppRule implements InvitationRule<Integer> {
 
     private final int totalScreenChanges;
     private final Session session;

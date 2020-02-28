@@ -5,8 +5,8 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
 
-import com.audienceproject.userreport.interfaces.ISurvey;
-import com.audienceproject.userreport.interfaces.ISurveyInvoker;
+import com.audienceproject.userreport.interfaces.Survey;
+import com.audienceproject.userreport.interfaces.SurveyInvoker;
 
 /**
  * Use this invoker if user should be invite to survey after some amount of activity changes.
@@ -14,36 +14,37 @@ import com.audienceproject.userreport.interfaces.ISurveyInvoker;
  * This invoker listen to activity life time events. If activity resumes `eventsCount` times,
  * than it calls survey.tryInvite().
  */
-public class ActivityChangesSurveyInvoker implements ISurveyInvoker, Application.ActivityLifecycleCallbacks {
-    private ISurvey survey;
+public class ActivityChangesSurveyInvoker implements SurveyInvoker, Application.ActivityLifecycleCallbacks {
+    private Survey survey;
     private int requiredEventsCount;
-    private static int eventsHappen;
+    private int eventsHappen;
     private String skipActivityWithClass;
     private Application applicationContext;
 
     /**
-     * @param context - Main activity context
-     * @param eventsCount - Amount of resumes after which try invite user to survey.
-     * @param skipActivityWithClass - If this parameter passed than resumes on this activity will not be count (pass YouActivity.class.getName()).
+     * @param context               - Main activity context
+     * @param eventsCount           - Amount of resumes after which try invite user to survey.
+     * @param skipActivityWithClass - If this parameter passed than resumes on this activity will not be count (pass
+     *                              YouActivity.class.getName()).
      */
-    public ActivityChangesSurveyInvoker(Context context, final int eventsCount, final String skipActivityWithClass){
+    public ActivityChangesSurveyInvoker(Context context, final int eventsCount, final String skipActivityWithClass) {
         this.requiredEventsCount = eventsCount;
         this.skipActivityWithClass = skipActivityWithClass;
 
-        this.applicationContext = ((Application)context.getApplicationContext());
+        this.applicationContext = ((Application) context.getApplicationContext());
         this.applicationContext.registerActivityLifecycleCallbacks(this);
     }
 
     private void eventHappen() {
-        this.eventsHappen++;
+        eventsHappen++;
 
-        if (this.eventsHappen == requiredEventsCount){
+        if (eventsHappen == requiredEventsCount) {
             this.survey.tryInvite();
         }
     }
 
     @Override
-    public void setSurvey(ISurvey survey) {
+    public void setSurvey(Survey survey) {
         this.survey = survey;
     }
 
@@ -72,7 +73,7 @@ public class ActivityChangesSurveyInvoker implements ISurveyInvoker, Application
     @Override
     public void onActivityResumed(Activity activity) {
         String className = activity.getComponentName().getClassName();
-        if (className.equals(this.skipActivityWithClass) == false){
+        if (!className.equals(this.skipActivityWithClass)) {
             eventHappen();
         }
     }

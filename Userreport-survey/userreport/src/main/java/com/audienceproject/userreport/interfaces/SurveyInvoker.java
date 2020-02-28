@@ -4,12 +4,12 @@ package com.audienceproject.userreport.interfaces;
  * We have tree predefined survey invokers - ActivityChangesSurveyInvoker, ManualEventSurveyInvoker, StandardInvoker.
  * But if you need to decide when to invite user take a survey you can do it by implementing this interface and passign it to builder.
   */
-public interface ISurveyInvoker {
+public interface SurveyInvoker {
     /**
      * Method setSurvey will be called inside builder and instance of survey will be passed.
      * @param survey instance of survey.
      */
-    void setSurvey(ISurvey survey);
+    void setSurvey(Survey survey);
 
     /**
      * Stops event tracking.

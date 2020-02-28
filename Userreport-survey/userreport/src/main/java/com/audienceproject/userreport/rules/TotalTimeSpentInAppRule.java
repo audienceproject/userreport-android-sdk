@@ -3,7 +3,7 @@ package com.audienceproject.userreport.rules;
 import com.audienceproject.userreport.models.Session;
 
 // Counts total time spent in app during all user sessions
-public class TotalTimeSpentInAppRule implements IInvitationRule<Integer> {
+public class TotalTimeSpentInAppRule implements InvitationRule<Integer> {
 
     private final int totalSecondsInApp;
     private final Session session;

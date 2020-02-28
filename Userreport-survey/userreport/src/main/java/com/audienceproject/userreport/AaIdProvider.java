@@ -13,7 +13,7 @@ class AaIdProvider {
         aaid = null;
     }
 
-    public void loadAaId(Context context, final IAaIdLoadedCallback callback) {
+    public void loadAaId(Context context, final AaIdLoadedCallback callback) {
         if (this.aaid != null) {
             callback.onSuccess(aaid.getAaid());
         } else {

@@ -4,7 +4,7 @@ import com.audienceproject.userreport.models.Session;
 
 import java.util.Date;
 
-public class LocalQuarantineInAppRule implements IInvitationRule<Integer> {
+public class LocalQuarantineInAppRule implements InvitationRule<Integer> {
 
     private final int localQuarantineDays;
     private final Session session;

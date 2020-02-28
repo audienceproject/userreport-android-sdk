@@ -3,7 +3,7 @@ package com.audienceproject.userreport.rules;
 import com.audienceproject.userreport.models.Session;
 
 // Needed to count screen changes during one user session
-public class SessionScreensChangeInAppRule implements IInvitationRule<Long> {
+public class SessionScreensChangeInAppRule implements InvitationRule<Long> {
 
     private final long screenChanges;
     private final Session session;

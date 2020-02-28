@@ -1,7 +1,7 @@
 package com.audienceproject.userreport.invokers;
 
-import com.audienceproject.userreport.interfaces.ISurvey;
-import com.audienceproject.userreport.interfaces.ISurveyInvoker;
+import com.audienceproject.userreport.interfaces.Survey;
+import com.audienceproject.userreport.interfaces.SurveyInvoker;
 
 /**
  * Provide possibility to track events by yourself.
@@ -10,8 +10,8 @@ import com.audienceproject.userreport.interfaces.ISurveyInvoker;
  * If amount of events equal to passed in constructor eventsCount than it calls survey.tryInvite().
  */
 
-public class ManualEventSurveyInvoker implements ISurveyInvoker {
-    private ISurvey survey;
+public class ManualEventSurveyInvoker implements SurveyInvoker {
+    private Survey survey;
     private int requiredEventsCount;
     private int eventsHappen;
     private Boolean trackEvents;
@@ -22,7 +22,7 @@ public class ManualEventSurveyInvoker implements ISurveyInvoker {
     }
 
     @Override
-    public void setSurvey(ISurvey survey) {
+    public void setSurvey(Survey survey) {
         this.survey = survey;
     }
 

@@ -2,6 +2,7 @@ package com.audienceproject.userreport;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.browser.customtabs.CustomTabsCallback;
@@ -11,7 +12,7 @@ import androidx.browser.customtabs.CustomTabsServiceConnection;
 import androidx.browser.customtabs.CustomTabsSession;
 import android.util.Log;
 
-import com.audienceproject.userreport.interfaces.ISurveyFinished;
+import com.audienceproject.userreport.interfaces.SurveyFinishedCallback;
 
 import java.util.ArrayList;
 
@@ -22,11 +23,11 @@ class CustomTabLauncher {
     private CustomTabsSession session;
     private String urlToLoad;
     private Context context;
-    private ISurveyFinished onFinished;
+    private SurveyFinishedCallback onFinished;
     private int color;
     private ErrorsSubmitter errorsSubmitter;
 
-    public CustomTabLauncher(Context context, int color, ISurveyFinished onFinished, ErrorsSubmitter errorsSubmitter){
+    public CustomTabLauncher(Context context, int color, SurveyFinishedCallback onFinished, ErrorsSubmitter errorsSubmitter){
         this.context = context;
         this.color = color;
         this.onFinished = onFinished;
@@ -76,6 +77,7 @@ class CustomTabLauncher {
         builder.setShowTitle(true);
         CustomTabsIntent customTabsIntent = builder.build();
         customTabsIntent.intent.setPackage("com.android.chrome");
+        customTabsIntent.intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         customTabsIntent.launchUrl(this.context, uri);
     }
 

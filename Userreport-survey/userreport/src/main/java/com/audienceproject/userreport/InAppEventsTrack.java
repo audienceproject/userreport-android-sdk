@@ -12,7 +12,7 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.audienceproject.userreport.interfaces.ISurveyLogger;
+import com.audienceproject.userreport.interfaces.SurveyLogger;
 import com.audienceproject.userreport.models.MediaSettings;
 
 import java.io.UnsupportedEncodingException;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-class InAppEventsTrack implements IInAppEventsTrack, Application.ActivityLifecycleCallbacks {
+class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecycleCallbacks {
 
     private String tCode;
     private String bundleId;
@@ -36,16 +36,16 @@ class InAppEventsTrack implements IInAppEventsTrack, Application.ActivityLifecyc
     private String defaultUserAgent;
     private RequestQueue queue;
     private Context context;
-    private ISettingsLoader settingsLoader;
-    private ISurveyLogger logger;
-    private VisitRequestDataProvider invitationProvider;
+    private SettingsLoader settingsLoader;
+    private SurveyLogger logger;
+    private InvintationProvider invitationProvider;
     private Map<String, String> sections;
     private boolean initialized;
     private boolean autoTracking;
     private boolean appStartTracked;
 
-    InAppEventsTrack(Context context, String mediaId, ISettingsLoader settingsLoader,
-                     ISurveyLogger logger, List<String> skipActivityWithClasses,
+    InAppEventsTrack(Context context, String mediaId, SettingsLoader settingsLoader,
+                     SurveyLogger logger, List<String> skipActivityWithClasses,
                      ErrorsSubmitter errorsSubmitter, boolean autoTracking) {
         this.context = context;
         this.settingsLoader = settingsLoader;
@@ -57,7 +57,7 @@ class InAppEventsTrack implements IInAppEventsTrack, Application.ActivityLifecyc
         applicationContext = ((Application) context.getApplicationContext());
         rnd = new Random();
         queue = Volley.newRequestQueue(context);
-        invitationProvider = new VisitRequestDataProvider(mediaId);
+        invitationProvider = new InvintationProvider(mediaId);
 
         applicationContext.registerActivityLifecycleCallbacks(this);
         defaultUserAgent = getUserAgentString(context);
@@ -135,7 +135,7 @@ class InAppEventsTrack implements IInAppEventsTrack, Application.ActivityLifecyc
     }
 
     private void loadSettings(Runnable callback) {
-        settingsLoader.registerSettingsLoadCallback(new ISettingsCallback() {
+        settingsLoader.registerSettingsLoadCallback(new SettingsLoadingCallback() {
             @Override
             public void onSuccess(MediaSettings settings) {
                 InAppEventsTrack.this.tCode = settings.getKitTcode();
@@ -218,5 +218,9 @@ class InAppEventsTrack implements IInAppEventsTrack, Application.ActivityLifecyc
         } catch (Exception ex) {
             return null; // exception might appear if there is no google APIs
         }
+    }
+    
+    public void setLogger(SurveyLogger logger) {
+        this.logger = logger;
     }
 }

@@ -4,7 +4,7 @@ package com.audienceproject.userreport.rules;
 import com.audienceproject.userreport.models.Session;
 
 // Needed to count time spent in application during one user session
-public class SessionTimeSpentInAppRule implements IInvitationRule<Long> {
+public class SessionTimeSpentInAppRule implements InvitationRule<Long> {
 
     private final long requiredSessionTime;
     private final Session session;

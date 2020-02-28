@@ -111,14 +111,14 @@
                 android:id="@+id/btnStart"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="onStartActivity_Click"
+                android:onClick="onStartActivityClick"
                 android:text="Open activity" />
 
             <Button
                 android:id="@+id/btnSetEmail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="btnSetEmail_Click"
+                android:onClick="onSetEmailClick"
                 android:text="Set Email" />
 
             <EditText
@@ -138,13 +138,13 @@
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="btnClearLog_Click"
+                android:onClick="onClearLogClick"
                 android:text="Clear Log" />
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="btnTryInvite_Click"
+                android:onClick="onTryInviteClick"
                 android:text="Try Invite" />
 
         </androidx.appcompat.widget.LinearLayoutCompat>
