@@ -7,30 +7,28 @@ import android.os.Build;
 import android.util.DisplayMetrics;
 
 import com.audienceproject.userreport.models.InvitationRequest;
+import com.audienceproject.userreport.models.User;
+import com.audienceproject.userreport.models.UserInfo;
 import com.audienceproject.userreport.models.VisitRequest;
-
-import java.util.HashMap;
 
 /**
  * This class form data for JSON requests to collect api.
  */
-class InvintationProvider implements VisitRequestDataProvider {
+class InvitationProvider implements VisitRequestDataProvider {
 
     private String mediaId;
     private String companyId;
     private AaIdProvider aaIdProvider;
-    private HashMap<UserIdentificationType, String> knownUserInfo;
+    private User user;
 
-    InvintationProvider(String mediaId) {
+    InvitationProvider(String mediaId, User user) {
         this.mediaId = mediaId;
-        this.knownUserInfo = new HashMap<>();
+        if (user == null) {this.user = new User();} else { this.user = user; }
         this.aaIdProvider = new AaIdProvider();
     }
 
-    public void setUserInfo(UserIdentificationType type, String value) {
-        if (type != null) {
-            this.knownUserInfo.put(type, value);
-        }
+    public void setUser(User user) {
+        this.user = user;
     }
 
     void setCompanyId(String companyId) {
@@ -38,25 +36,23 @@ class InvintationProvider implements VisitRequestDataProvider {
     }
 
     public void createVisit(Context context, VisitRequestReadyCallBack callBack) {
-        VisitRequest r = new VisitRequest();
-
-        this.fillWithData(context, r);
-        this.loadAaid(context, r, callBack);
+        VisitRequest request = new VisitRequest();
+        fillWithData(context, request);
+        loadAaid(context, request, callBack);
     }
 
     public void createInvitation(Context context, VisitRequestReadyCallBack callBack) {
-        InvitationRequest r = new InvitationRequest();
-
-        this.fillWithData(context, r);
-        r.customization.hideCloseButton = false;
-        r.customization.isCustomTab = true;
-        this.loadAaid(context, r, callBack);
+        InvitationRequest request = new InvitationRequest();
+        fillWithData(context, request);
+        request.customization.hideCloseButton = false;
+        request.customization.isCustomTab = true;
+        this.loadAaid(context, request, callBack);
     }
 
     private void loadAaid(Context context, final VisitRequest request, final VisitRequestReadyCallBack callBack) {
         aaIdProvider.loadAaId(context, new AaIdLoadedCallback() {
             public void onSuccess(String aaid) {
-                request.user.adid = aaid;
+                request.userInfo.setAdid(aaid);
                 callBack.onReady(request);
             }
 
@@ -67,10 +63,9 @@ class InvintationProvider implements VisitRequestDataProvider {
     }
 
     private void fillWithData(Context context, VisitRequest request) {
-        request.user.email = this.knownUserInfo.get(UserIdentificationType.Email);
-        request.user.emailMd5 = this.knownUserInfo.get(UserIdentificationType.EmailMd5);
-        request.user.emailSha1 = this.knownUserInfo.get(UserIdentificationType.EmailSha1);
-        request.user.emailSha256 = this.knownUserInfo.get(UserIdentificationType.EmailSha256);
+        if (user != null) {
+            request.userInfo = new UserInfo(user);
+        }
 
         request.media.bundleId = this.getPackageFullName(context);
         request.media.mediaId = this.mediaId;
@@ -95,8 +90,7 @@ class InvintationProvider implements VisitRequestDataProvider {
     private double getDeviseDiagonal(DisplayMetrics displayMetrics) {
         double heightInches = displayMetrics.heightPixels / displayMetrics.ydpi;
         double widthInches = displayMetrics.widthPixels / displayMetrics.xdpi;
-        double diagonal = Math.sqrt(heightInches * heightInches + widthInches * widthInches);
-        return diagonal;
+        return Math.sqrt(heightInches * heightInches + widthInches * widthInches);
     }
 
     private PackageInfo getPackage(Context context) {

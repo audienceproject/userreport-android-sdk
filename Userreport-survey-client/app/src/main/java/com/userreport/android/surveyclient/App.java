@@ -3,7 +3,6 @@ package com.userreport.android.surveyclient;
 import android.app.Application;
 
 import com.audienceproject.userreport.UserReport;
-import com.audienceproject.userreport.UserReportCore;
 import com.audienceproject.userreport.models.Settings;
 
 public class App extends Application {
@@ -27,10 +26,13 @@ public class App extends Application {
         settings.setSessionNSecondsLength(7);
         settings.setSessionScreensView(3);
         settings.setLocalQuarantineDays(10);
-        UserReportCore core = UserReportCore.newBuilder("audienceproject", "8aa7a61b-5c16-40c4-9b9e-c5ba641a160b")
-                .setSettings(settings)
-                .build();
-        userReport = UserReport.with(this, core);
+        userReport =
+                UserReport.configure(this,
+                        "audienceproject",
+                        "8aa7a61b-5c16-40c4-9b9e-c5ba641a160b",
+                        null,
+                        settings,
+                        null);
     }
 
     public UserReport getUserReport() {

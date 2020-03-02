@@ -15,11 +15,11 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.audienceproject.userreport.DateConverter;
-import com.audienceproject.userreport.UserIdentificationType;
 import com.audienceproject.userreport.UserReport;
 import com.audienceproject.userreport.interfaces.SurveyLogger;
 import com.audienceproject.userreport.models.Session;
 import com.audienceproject.userreport.models.Settings;
+import com.audienceproject.userreport.models.User;
 
 import java.util.Date;
 import java.util.Timer;
@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         Session session = userReport.getSession();
-                        Settings settings = userReport.getSettings();
+                        Settings settings = userReport.getMediaSettings();
 
                         if (settings == null) {
                             return;
@@ -153,8 +153,11 @@ public class MainActivity extends AppCompatActivity {
     public void onSetEmailClick(View view) {
         EditText v = findViewById(R.id.email_text_input);
         String userEmail = v.getText().toString();
-        if (!TextUtils.isEmpty(userEmail))
-            userReport.setUserInfo(UserIdentificationType.Email, userEmail);
+        if (!TextUtils.isEmpty(userEmail)) {
+            User newUser = new User();
+            newUser.setEmail(userEmail);
+            userReport.updateUser(newUser);
+        }
     }
 
     public void onStartActivityClick(View view) {
@@ -175,7 +178,6 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, "Survey is not ready yet", Toast.LENGTH_LONG).show();
             return;
         }
-        this.userReport.getSurvey().tryInvite();
-
+        this.userReport.tryToInvite();
     }
 }

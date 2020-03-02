@@ -1,6 +1,7 @@
 package com.audienceproject.userreport;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.audienceproject.userreport.interfaces.Survey;
 import com.audienceproject.userreport.interfaces.SurveyErrorCallback;
@@ -11,38 +12,57 @@ import com.audienceproject.userreport.invokers.StandardInvoker;
 import com.audienceproject.userreport.models.MediaSettings;
 import com.audienceproject.userreport.models.Session;
 import com.audienceproject.userreport.models.Settings;
+import com.audienceproject.userreport.models.User;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserReport {
     private static volatile UserReport instance;
-    private UserReportCore core;
+    private String sakId;
+    private String mediaId;
+    private Settings settings;
+    private User user;
     private Context context;
+    private SurveyInvoker invoker;
+    private List<String> skipActivityWithClasses = new ArrayList<>();
+    private boolean autoTracking = true;
+    private SurveyLogger logger;
+    private boolean testMode = false;
+
+    private SurveyFinishedCallback onSurveyFinishedCallback;
+    private SurveyErrorCallback onSurveyErrorCallback;
+
     private CollectApiClient collectApiClient;
     private InAppEventsTrack track;
     private Session session;
-    private SurveyInvoker invoker;
     private SettingsLoader settingsLoader;
     private ErrorsSubmitter errorsSubmitter;
-    private SurveyLogger logger;
-    private InvintationProvider invitationProvider;
-    private MediaSettings settings;
+    private InvitationProvider invitationProvider;
+    private MediaSettings mediaSettings;
     private Survey survey;
-    private SurveyErrorCallback surveyErrorCallback;
-    private SurveyFinishedCallback surveyFinishedCallBack;
 
 
-    private UserReport(Context context, UserReportCore core) {
-        this.core = core;
+    private UserReport(Context context, String sakId, String mediaId, User user, Settings settings,
+                       SurveyInvoker invoker) {
+        this.mediaId = mediaId;
+        this.sakId = sakId;
+        this.settings = settings;
+        this.user = user;
+        this.invoker = invoker;
         this.context = context;
+        checkSakAndMediaId();
         init();
     }
 
-    public static UserReport with(Context context, UserReportCore userReportCore) {
+    public static UserReport configure(Context context, String sakId, String mediaId, User user, Settings settings,
+                                       SurveyInvoker invoker) {
         UserReport localInstance = instance;
         if (localInstance == null) {
             synchronized (UserReport.class) {
                 localInstance = instance;
                 if (localInstance == null) {
-                    instance = localInstance = new UserReport(context, userReportCore);
+                    instance = localInstance = new UserReport(context, sakId, mediaId, user, settings, invoker);
                 }
             }
         }
@@ -55,10 +75,9 @@ public class UserReport {
         initSettingsLoader();
         initInvoker();
         initLogger();
-        initTracker();
         createInvitationProvider();
+        initTracker();
         createCollectApiClient();
-        initCallBacks();
         createSurvey();
         logVisit();
         trackAppStarted();
@@ -77,66 +96,54 @@ public class UserReport {
         String settingsBaseUrl = context.getString(R.string.ap_settings_base_url);
         settingsLoader = new UserReportSettingsLoader(context,
                 settingsBaseUrl,
-                core.getSakId(),
-                core.getMediaId(),
+                sakId,
+                mediaId,
                 errorsSubmitter,
-                this.settings);
+                settings);
     }
 
     private void initInvoker() {
-        if (core.getInvoker() == null) {
+        if (invoker == null) {
             invoker = new StandardInvoker(context, settingsLoader, session);
-        } else {
-            invoker = core.getInvoker();
         }
     }
 
     private void initLogger() {
-        if (core.getLogger() == null) {
+        if (logger == null) {
             logger = new SilentLogger();
-        } else {
-            logger = core.getLogger();
         }
     }
 
     private void initTracker() {
-        track = new InAppEventsTrack(context, core.getMediaId(), settingsLoader, logger,
-                core.getSkipActivityWithClasses(), errorsSubmitter, core.isAutoTracking());
+        track = new InAppEventsTrack(context, settingsLoader, logger,
+                skipActivityWithClasses, errorsSubmitter, autoTracking, invitationProvider);
     }
 
     private void createInvitationProvider() {
-        invitationProvider = new InvintationProvider(core.getMediaId());
-        for (UserIdentificationType type : core.getKnownUserInfo().keySet()) {
-            invitationProvider.setUserInfo(type, core.getKnownUserInfo().get(type));
-        }
+        invitationProvider = new InvitationProvider(mediaId, user);
     }
 
     private void createCollectApiClient() {
         String collectApiEndpoint = context.getString(R.string.ap_collect_api_endpoint);
         collectApiClient = new CollectApiClient(collectApiEndpoint, context, logger);
-        collectApiClient.setTestMode(core.isTestMode());
-    }
-
-    private void initCallBacks() {
-        surveyErrorCallback = core.getOnSurveyErrorCallback();
-        surveyFinishedCallBack = core.getOnSurveyFinishedCallback();
+        collectApiClient.setTestMode(testMode);
     }
 
     private void createSurvey() {
         settingsLoader.registerSettingsLoadCallback(new SettingsLoadingCallback() {
             @Override
             public void onSuccess(MediaSettings settings) {
-                UserReport.this.settings = settings;
+                mediaSettings = settings;
                 invitationProvider.setCompanyId(settings.getCompanyId());
                 survey = new UserReportSurvey(context,
                         collectApiClient,
-                        core.getMediaId(),
+                        mediaId,
                         settings.getToolBarColor(),
                         errorsSubmitter,
                         session,
                         invitationProvider);
-                survey.setSurveyOnFinished(surveyFinishedCallBack);
-                survey.setSurveyErrorCallback(surveyErrorCallback);
+                survey.setSurveyErrorCallback(onSurveyErrorCallback);
+                survey.setSurveyOnFinished(onSurveyFinishedCallback);
                 invoker.setSurvey(survey);
             }
 
@@ -151,15 +158,11 @@ public class UserReport {
 
     /**
      * Provide possibility to extend data about user sent to backend.
-     * For example call of this method may look like: survey.setUserInfo(UserIdentificationType.Email, "know
-     * .user@gmail.com")
      *
-     * @param type  UserIdentificationType type of data which you want provide.
-     * @param value actually data.
+     * @param user User info
      */
-    public void setUserInfo(UserIdentificationType type, String value) {
-        if (invitationProvider != null) invitationProvider.setUserInfo(type, value);
-        createSurvey();
+    public void updateUser(User user) {
+        if (invitationProvider != null) invitationProvider.setUser(user);
     }
 
     public void setTestMode(Boolean testMode) {
@@ -175,8 +178,8 @@ public class UserReport {
         return session;
     }
 
-    public Settings getSettings() {
-        return settings;
+    public Settings getMediaSettings() {
+        return mediaSettings;
     }
 
     public SurveyInvoker getInvoker() {
@@ -213,7 +216,7 @@ public class UserReport {
         if (survey != null) {
             survey.setSurveyErrorCallback(callback);
         }
-        this.surveyErrorCallback = callback;
+        onSurveyErrorCallback = callback;
     }
 
     /**
@@ -225,7 +228,7 @@ public class UserReport {
         if (survey != null) {
             survey.setSurveyOnFinished(callback);
         }
-        surveyFinishedCallBack = callback;
+        onSurveyFinishedCallback = callback;
     }
 
     /**
@@ -262,5 +265,63 @@ public class UserReport {
     public void setLogger(SurveyLogger logger) {
         if (track != null) track.setLogger(logger);
         if (collectApiClient != null) collectApiClient.setLogger(logger);
+    }
+
+    private void checkSakAndMediaId() {
+        if (TextUtils.isEmpty(mediaId) || TextUtils.isEmpty(sakId)) {
+            throw new IllegalStateException("You must provide MediaId and SakId!");
+        }
+    }
+
+    /**
+     * By default autoTracking = true
+     *
+     * @param autoTracking
+     */
+    public void setAutoTracking(boolean autoTracking) {
+        this.autoTracking = autoTracking;
+        if (track != null)
+            track.setAutoTracking(autoTracking);
+    }
+
+    /**
+     * UserReport survey settings provided by user
+     *
+     * @param settings UserReport survey settings
+     */
+    public void updateSettings(Settings settings) {
+        this.settings = settings;
+        initSettingsLoader();
+        createSurvey();
+    }
+
+    /**
+     * Starts survey in test mode.
+     * <p>
+     * In this mode you will bw always invited to take survey. This is very useful when you need to check how
+     * survey will be displayed.
+     * Do not forget to remove call to this method in production.
+     */
+    public void setTestMode(boolean testMode) {
+        this.testMode = testMode;
+        if (collectApiClient != null) collectApiClient.setTestMode(testMode);
+    }
+
+    /**
+     * This method needed to prevent counting switches to main activity.
+     * <p>
+     * For example you have activity called MainActivity and some AuctionActivity. So when user opens some
+     * AuctionActivity  we will count it,
+     * but then user close this activity and MainActivity will be counted, so if you do not want this return to
+     * MainActivity as action call this method and
+     * put MainActivity.class.getName() as parameter/
+     *
+     * @param skipActivityWithClasses name of activities you do not want to count.
+     * @return UserReportBuilder
+     */
+    public void skipTrackingFor(List<String> skipActivityWithClasses) {
+        this.skipActivityWithClasses = skipActivityWithClasses;
+        if (track != null)
+            track.setSkipActivityWithClasses(skipActivityWithClasses);
     }
 }

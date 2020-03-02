@@ -39,7 +39,7 @@ class UserReportSettingsLoader implements SettingsLoader {
     private ErrorsSubmitter errorsSubmitter;
     private Settings userSettings;
 
-    public UserReportSettingsLoader(Context context, String settingsBaseUrl, String sakId, String mediaId,
+    UserReportSettingsLoader(Context context, String settingsBaseUrl, String sakId, String mediaId,
                                     ErrorsSubmitter errorsSubmitter, Settings settings) {
         this.application = (Application) context.getApplicationContext();
         this.settingsBaseUrl = settingsBaseUrl;
