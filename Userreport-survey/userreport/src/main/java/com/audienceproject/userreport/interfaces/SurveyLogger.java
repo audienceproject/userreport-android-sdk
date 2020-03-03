@@ -5,7 +5,7 @@ package com.audienceproject.userreport.interfaces;
  * <p>
  * Implement this interface if you want to know what sdk send to network and which errors happen. Also this may help during application development.
  */
-public interface ISurveyLogger{
+public interface SurveyLogger {
     /**
      * Will be called when sdk performs network activity
      * @param type Type for the event.

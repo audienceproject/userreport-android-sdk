@@ -6,7 +6,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.audienceproject.userreport.interfaces.Consumer;
-import com.audienceproject.userreport.interfaces.ISurveyLogger;
+import com.audienceproject.userreport.interfaces.SurveyLogger;
 import com.audienceproject.userreport.models.InvitationRequest;
 import com.audienceproject.userreport.models.InvitationResponse;
 import com.audienceproject.userreport.models.QuarantineRequest;
@@ -19,7 +19,7 @@ import java.util.Date;
 
 class CollectApiClient {
     private boolean testModeOn = false;
-    private ISurveyLogger logger;
+    private SurveyLogger logger;
     private String apiUrl;
 
     private long tag;
@@ -31,7 +31,7 @@ class CollectApiClient {
 
     private RequestQueue queue;
 
-    public CollectApiClient(String apiUrl, Context context, ISurveyLogger networkLogger) {
+    public CollectApiClient(String apiUrl, Context context, SurveyLogger networkLogger) {
         this.tag = new Date().getTime();
         this.apiUrl = apiUrl;
         this.queue = Volley.newRequestQueue(context);
@@ -54,13 +54,13 @@ class CollectApiClient {
                 url,
                 json,
                 response -> CollectApiClient.this.logger.networkActivity("Response", response, url),
-                error -> CollectApiClient.this.logger.error("Response ERROR", error));
+                error -> CollectApiClient.this.logger.error("Log Visit Response ERROR", error));
 
         gsonRequest.setTag(this.tag);
         this.queue.add(gsonRequest);
     }
 
-    public void tryInviteToSurvey(InvitationRequest invitation, final IInviteCallback callback) {
+    public void tryInviteToSurvey(InvitationRequest invitation, final InviteCallback callback) {
         String url = this.apiUrl + this.invitationUrl;
         if (this.testModeOn) {
             url = this.apiUrl + this.testInvitationUrl;
@@ -76,7 +76,7 @@ class CollectApiClient {
             InvitationResponse result = gson.fromJson(response, InvitationResponse.class);
             callback.processInviteResult(result);
         }, error -> {
-            CollectApiClient.this.logger.error("Response ERROR", error);
+            CollectApiClient.this.logger.error("Try Invite To Survey Response ERROR", error);
             int statusCode = 404;
             if (error.networkResponse != null) {
                 statusCode = error.networkResponse.statusCode;
@@ -108,7 +108,7 @@ class CollectApiClient {
                     updateQuarantine.run();
                 },
                 error -> {
-                    logger.error("Response ERROR", error);
+                    logger.error("Set Quarantine Response ERROR", error);
                     updateQuarantine.run();
                 });
 
@@ -129,9 +129,13 @@ class CollectApiClient {
                     logger.networkActivity("Response", response, url);
                     responseConsumer.consume(gson.fromJson(response, QuarantineResponse.class));
                 },
-                error -> logger.error("Response ERROR", error));
+                error -> logger.error("Get Quarantine Response ERROR", error));
 
         gsonRequest.setTag(tag);
         this.queue.add(gsonRequest);
+    }
+
+    public void setLogger(SurveyLogger logger) {
+        this.logger = logger;
     }
 }

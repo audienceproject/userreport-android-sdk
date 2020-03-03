@@ -1,6 +1,6 @@
 package com.audienceproject.userreport.rules;
 
-public interface IInvitationRule<T> {
+public interface InvitationRule<T> {
 
     boolean isTriggered();
 

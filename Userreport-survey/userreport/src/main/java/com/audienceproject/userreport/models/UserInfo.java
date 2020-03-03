@@ -1,13 +1,32 @@
 package com.audienceproject.userreport.models;
 
 /**
- * POJO model describing known user info
+ * POJO model describing user
  */
-public class User {
+
+public class UserInfo {
+    private String adid;
     private String email;
     private String emailMd5;
     private String emailSha1;
     private String emailSha256;
+
+    UserInfo() {}
+
+    public UserInfo(User user) {
+        this.email = user.getEmail();
+        this.emailMd5 = user.getEmailMd5();
+        this.emailSha1 = user.getEmailSha1();
+        this.emailSha256 = user.getEmailSha256();
+    }
+
+    public String getAdid() {
+        return adid;
+    }
+
+    public void setAdid(String adid) {
+        this.adid = adid;
+    }
 
     public String getEmail() {
         return email;

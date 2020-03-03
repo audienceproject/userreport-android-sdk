@@ -8,11 +8,10 @@ import android.content.SharedPreferences;
 public class SharedPreferencesWrapper {
     private final String FILE_NAME = "AudienceProject_storage";
     private final SharedPreferences settings;
-    private final Application application;
 
     public SharedPreferencesWrapper(Context context) {
-        this.application = ((Application) context.getApplicationContext());
-        this.settings = this.application.getSharedPreferences(FILE_NAME, 0);
+        Application application = ((Application) context.getApplicationContext());
+        this.settings = application.getSharedPreferences(FILE_NAME, 0);
     }
 
     public long readLong(String key){
@@ -20,7 +19,7 @@ public class SharedPreferencesWrapper {
     }
 
     public void writeLong(String key, long value){
-        this.settings.edit().putLong(key, value).commit();
+        this.settings.edit().putLong(key, value).apply();
     }
 
     public boolean readBool(String key){
@@ -28,7 +27,7 @@ public class SharedPreferencesWrapper {
     }
 
     public void writeBool(String key, boolean value){
-        this.settings.edit().putBoolean(key, value).commit();
+        this.settings.edit().putBoolean(key, value).apply();
     }
 
     public String readString(String key){
@@ -36,6 +35,6 @@ public class SharedPreferencesWrapper {
     }
 
     public void writeString(String key, String value){
-        this.settings.edit().putString(key, value).commit();
+        this.settings.edit().putString(key, value).apply();
     }
 }

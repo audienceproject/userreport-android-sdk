@@ -8,13 +8,13 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import com.audienceproject.userreport.ISettingsCallback;
-import com.audienceproject.userreport.ISettingsLoader;
-import com.audienceproject.userreport.interfaces.ISurvey;
-import com.audienceproject.userreport.interfaces.ISurveyInvoker;
+import com.audienceproject.userreport.SettingsLoadingCallback;
+import com.audienceproject.userreport.SettingsLoader;
+import com.audienceproject.userreport.interfaces.Survey;
+import com.audienceproject.userreport.interfaces.SurveyInvoker;
 import com.audienceproject.userreport.models.MediaSettings;
 import com.audienceproject.userreport.models.Session;
-import com.audienceproject.userreport.rules.IInvitationRule;
+import com.audienceproject.userreport.rules.InvitationRule;
 import com.audienceproject.userreport.rules.LocalQuarantineInAppRule;
 import com.audienceproject.userreport.rules.SessionScreensChangeInAppRule;
 import com.audienceproject.userreport.rules.SessionTimeSpentInAppRule;
@@ -29,25 +29,25 @@ import java.util.ArrayList;
  * This invoker will be used in case if you not provide any invoker to builder, which is in most
  * case just fine. All methods of this class work like described in documentation for ISurveyInvoker
  */
-public class StandardInvoker implements ISurveyInvoker, Application.ActivityLifecycleCallbacks {
+public class StandardInvoker implements SurveyInvoker, Application.ActivityLifecycleCallbacks {
 
     private TotalScreensChangeInAppRule totalScreensChangeInAppRule;
     private TotalTimeSpentInAppRule totalTimeSpentInAppRule;
     private SessionScreensChangeInAppRule sessionScreensChangeInAppRule;
     private SessionTimeSpentInAppRule sessionTimeSpentInAppRule;
     private LocalQuarantineInAppRule localQuarantineInAppRule;
-    private ArrayList<IInvitationRule> allRules;
+    private ArrayList<InvitationRule> allRules;
     private Thread timerThread;
     private boolean alreadyInvited;
     private boolean isActive = true;
     private boolean rulesInitialized;
     private Session session;
 
-    public StandardInvoker(Context context, ISettingsLoader settingsLoader, Session session) {
+    public StandardInvoker(Context context, SettingsLoader settingsLoader, Session session) {
         this.allRules = new ArrayList<>();
         this.session = session;
 
-        settingsLoader.registerSettingsLoadCallback(new ISettingsCallback() {
+        settingsLoader.registerSettingsLoadCallback(new SettingsLoadingCallback() {
             @Override
             public void onSuccess(MediaSettings settings) {
                 totalScreensChangeInAppRule = new TotalScreensChangeInAppRule(settings.getInviteAfterTotalScreensViewed(), session);
@@ -79,20 +79,18 @@ public class StandardInvoker implements ISurveyInvoker, Application.ActivityLife
     }
 
     @Override
-    public void setSurvey(final ISurvey survey) {
+    public void setSurvey(final Survey survey) {
         this.timerThread = new Thread() {
             @Override
             public void run() {
                 try {
                     while (!isInterrupted() && !alreadyInvited) {
-                        Log.d("Thread.", "Iteration");
                         Thread.sleep(1000);
                         new Handler(Looper.getMainLooper()).post(() -> {
                             if (rulesInitialized) {
                                 boolean allTriggered = true;
-                                for (IInvitationRule rule : allRules) {
+                                for (InvitationRule rule : allRules) {
                                     boolean isRuleTriggered = rule.isTriggered();
-                                    System.out.println(isRuleTriggered + " " + rule.getClass().getSimpleName());
                                     allTriggered = allTriggered && isRuleTriggered;
                                 }
 

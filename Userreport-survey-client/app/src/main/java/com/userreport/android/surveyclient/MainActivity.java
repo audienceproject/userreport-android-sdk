@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -14,12 +15,11 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.audienceproject.userreport.DateConverter;
-import com.audienceproject.userreport.UserIdentificationType;
 import com.audienceproject.userreport.UserReport;
-import com.audienceproject.userreport.UserReportBuilder;
-import com.audienceproject.userreport.interfaces.ISurveyLogger;
+import com.audienceproject.userreport.interfaces.SurveyLogger;
 import com.audienceproject.userreport.models.Session;
 import com.audienceproject.userreport.models.Settings;
+import com.audienceproject.userreport.models.User;
 
 import java.util.Date;
 import java.util.Timer;
@@ -36,42 +36,25 @@ public class MainActivity extends AppCompatActivity {
     private TextView sessionNSecondsLengthTextView;
 
     // Survey
-    private ISurveyLogger logger;
-    private String userEmail;
+    private SurveyLogger logger;
     private UserReport userReport;
-
-    private boolean testModeEnabled = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         Thread.setDefaultUncaughtExceptionHandler((thread, e) -> {
             Log.d("Unhandled Exception", e.toString());
             e.printStackTrace();
         });
-
         setContentView(R.layout.activity_main);
+        initUserReport();
+        initUi();
+        this.onClearLogClick(null);
+    }
 
-        Switch testModeSwitch = findViewById(R.id.switch1);
-        testModeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            testModeEnabled = isChecked;
-            userReport.destroy();
-            this.buildSurvey();
-        });
-
-        this.networkLog = findViewById(R.id.txtServerLog);
-        localQuarantineDaysTextView = findViewById(R.id.localQuarantineDays);
-        inviteAfterNSecondsInAppTextView = findViewById(R.id.inviteAfterNSecondsInApp);
-        inviteAfterTotalScreensViewedTextView = findViewById(R.id.inviteAfterTotalScreensViewed);
-        sessionScreensViewTextView = findViewById(R.id.sessionScreensView);
-        sessionNSecondsLengthTextView = findViewById(R.id.sessionNSecondsLength);
-
-        setSettingsValues();
-
-        this.btnClearLog_Click(null);
-
-        this.logger = new ISurveyLogger() {
+    private void initUserReport() {
+        userReport = App.get().getUserReport();
+        this.logger = new SurveyLogger() {
             @Override
             public void networkActivity(String type, String data, String url) {
                 Log.i(type, " URL: " + url + "\nData\n" + data);
@@ -86,8 +69,28 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("Error in UserReport", message, ex);
             }
         };
+        userReport.setLogger(logger);
+        userReport.setSurveyFinishedCallback(() -> new Handler(Looper.getMainLooper()).post(() ->
+                Toast.makeText(MainActivity.this, "Thanks for taking survey", Toast.LENGTH_LONG).show()));
+        userReport.setOnErrorListener((httpStatusCode, message) -> {
+            Toast toast = Toast.makeText(getApplicationContext(), "Oops... Server Error.", Toast.LENGTH_LONG);
+            toast.show();
+        });
+    }
 
-        this.buildSurvey();
+    private void initUi() {
+        Switch testModeSwitch = findViewById(R.id.switch1);
+        testModeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            userReport.setTestMode(isChecked);
+        });
+
+        this.networkLog = findViewById(R.id.txtServerLog);
+        localQuarantineDaysTextView = findViewById(R.id.localQuarantineDays);
+        inviteAfterNSecondsInAppTextView = findViewById(R.id.inviteAfterNSecondsInApp);
+        inviteAfterTotalScreensViewedTextView = findViewById(R.id.inviteAfterTotalScreensViewed);
+        sessionScreensViewTextView = findViewById(R.id.sessionScreensView);
+        sessionNSecondsLengthTextView = findViewById(R.id.sessionNSecondsLength);
+        setSettingsValues();
     }
 
     private void setSettingsValues() {
@@ -99,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         Session session = userReport.getSession();
-                        Settings settings = userReport.getSettings();
+                        Settings settings = userReport.getMediaSettings();
 
                         if (settings == null) {
                             return;
@@ -143,19 +146,21 @@ public class MainActivity extends AppCompatActivity {
         this.userReport.getSession().setLocalQuarantineDate(new Date());
     }
 
-    public void btnClearLog_Click(View view) {
+    public void onClearLogClick(View view) {
         this.networkLog.setText("Network response/request logs:");
     }
 
-    public void btnSetEmail_Click(View view) {
+    public void onSetEmailClick(View view) {
         EditText v = findViewById(R.id.email_text_input);
-        userEmail = v.getText().toString();
-
-        userReport.destroy();
-        this.buildSurvey();
+        String userEmail = v.getText().toString();
+        if (!TextUtils.isEmpty(userEmail)) {
+            User newUser = new User();
+            newUser.setEmail(userEmail);
+            userReport.updateUser(newUser);
+        }
     }
 
-    public void onStartActivity_Click(View view) {
+    public void onStartActivityClick(View view) {
         Intent intent = new Intent(this, StubActivity.class);
         this.startActivity(intent);
     }
@@ -168,47 +173,11 @@ public class MainActivity extends AppCompatActivity {
         userReport.trackSectionScreenView(("a20ff83b-2b46-42a1-8969-5fb4ad6e4f17"));
     }
 
-    public void btnTryInvite_Click(View view) {
+    public void onTryInviteClick(View view) {
         if (userReport.getSurvey() == null) {
             Toast.makeText(MainActivity.this, "Survey is not ready yet", Toast.LENGTH_LONG).show();
             return;
         }
-        this.userReport.getSurvey().tryInvite();
-
-    }
-
-    private void buildSurvey() {
-        // Optional
-        Settings settings = new Settings();
-        settings.setSessionNSecondsLength(7);
-        settings.setSessionScreensView(3);
-        settings.setLocalQuarantineDays(10);
-
-        UserReportBuilder builder = new UserReportBuilder("audienceproject",
-                "8ad25ee8-595c-4f79-8a05-37dc3fe5c0cd")
-                .setLogger(logger)
-                .setSettings(settings)
-                .setSurveyFinished(() -> new Handler(Looper.getMainLooper()).post(() ->
-                        Toast.makeText(MainActivity.this, "Thanks for taking survey", Toast.LENGTH_LONG).show()));
-
-        if (testModeEnabled) {
-            builder.setSurveyTestMode();
-        }
-
-        if (userEmail != null) {
-            builder.setUserInfo(UserIdentificationType.Email, userEmail);
-        }
-
-        this.userReport = builder.build(this);
-        this.userReport.setOnError((httpStatusCode, message) -> {
-            Toast toast = Toast.makeText(getApplicationContext(), "Oops... Server Error.", Toast.LENGTH_LONG);
-            toast.show();
-        });
-    }
-
-    @Override
-    public void onDestroy() {
-        userReport.destroy();
-        super.onDestroy();
+        this.userReport.tryToInvite();
     }
 }

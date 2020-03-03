@@ -12,7 +12,7 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.audienceproject.userreport.interfaces.ISurveyLogger;
+import com.audienceproject.userreport.interfaces.SurveyLogger;
 import com.audienceproject.userreport.models.MediaSettings;
 
 import java.io.UnsupportedEncodingException;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-class InAppEventsTrack implements IInAppEventsTrack, Application.ActivityLifecycleCallbacks {
+class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecycleCallbacks {
 
     private String tCode;
     private String bundleId;
@@ -36,29 +36,29 @@ class InAppEventsTrack implements IInAppEventsTrack, Application.ActivityLifecyc
     private String defaultUserAgent;
     private RequestQueue queue;
     private Context context;
-    private ISettingsLoader settingsLoader;
-    private ISurveyLogger logger;
-    private VisitRequestDataProvider invitationProvider;
+    private SettingsLoader settingsLoader;
+    private SurveyLogger logger;
+    private InvitationProvider invitationProvider;
     private Map<String, String> sections;
     private boolean initialized;
     private boolean autoTracking;
     private boolean appStartTracked;
 
-    InAppEventsTrack(Context context, String mediaId, ISettingsLoader settingsLoader,
-                     ISurveyLogger logger, List<String> skipActivityWithClasses,
-                     ErrorsSubmitter errorsSubmitter, boolean autoTracking) {
+    InAppEventsTrack(Context context, SettingsLoader settingsLoader,
+                     SurveyLogger logger, List<String> skipActivityWithClasses,
+                     ErrorsSubmitter errorsSubmitter, boolean autoTracking,
+                     InvitationProvider invitationProvider) {
         this.context = context;
         this.settingsLoader = settingsLoader;
         this.logger = logger;
         this.skipActivityWithClasses = skipActivityWithClasses;
         this.errorsSubmitter = errorsSubmitter;
         this.autoTracking = autoTracking;
+        this.invitationProvider = invitationProvider;
 
         applicationContext = ((Application) context.getApplicationContext());
         rnd = new Random();
         queue = Volley.newRequestQueue(context);
-        invitationProvider = new VisitRequestDataProvider(mediaId);
-
         applicationContext.registerActivityLifecycleCallbacks(this);
         defaultUserAgent = getUserAgentString(context);
     }
@@ -121,7 +121,7 @@ class InAppEventsTrack implements IInAppEventsTrack, Application.ActivityLifecyc
     private void checkAAid(Runnable callback) {
         if (!initialized) {
             loadSettings(() -> invitationProvider.createVisit(context, request -> {
-                InAppEventsTrack.this.aaid = request.user.adid;
+                        InAppEventsTrack.this.aaid = request.userInfo.getAdid();
                         InAppEventsTrack.this.bundleId = request.media.bundleId;
 
                         initialized = true;
@@ -135,7 +135,7 @@ class InAppEventsTrack implements IInAppEventsTrack, Application.ActivityLifecyc
     }
 
     private void loadSettings(Runnable callback) {
-        settingsLoader.registerSettingsLoadCallback(new ISettingsCallback() {
+        settingsLoader.registerSettingsLoadCallback(new SettingsLoadingCallback() {
             @Override
             public void onSuccess(MediaSettings settings) {
                 InAppEventsTrack.this.tCode = settings.getKitTcode();
@@ -155,7 +155,8 @@ class InAppEventsTrack implements IInAppEventsTrack, Application.ActivityLifecyc
 
         final String url = this.composeUrl(tCode, event);
 
-        StringRequest request = new StringRequest(url, response -> logger.networkActivity("App events tracking", "Ok", url),
+        StringRequest request = new StringRequest(url, response -> logger.networkActivity("App events tracking", "Ok"
+                , url),
                 error -> {
                     InAppEventsTrack.this.errorsSubmitter.logError(error, url);
                     logger.error("App events tracking", error);
@@ -218,5 +219,17 @@ class InAppEventsTrack implements IInAppEventsTrack, Application.ActivityLifecyc
         } catch (Exception ex) {
             return null; // exception might appear if there is no google APIs
         }
+    }
+
+    void setLogger(SurveyLogger logger) {
+        this.logger = logger;
+    }
+
+    public void setSkipActivityWithClasses(List<String> skipActivityWithClasses) {
+        this.skipActivityWithClasses = skipActivityWithClasses;
+    }
+
+    public void setAutoTracking(boolean autoTracking) {
+        this.autoTracking = autoTracking;
     }
 }
