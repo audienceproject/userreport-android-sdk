@@ -1,6 +1,6 @@
 # UserReport Android SDK
 
-Brings UserReport capabilities in native Android application – Surveys and Audience Measurement
+Brings UserReport capabilities to native Android application – Surveys and Audience Measurement
 
 ## Requirements
 
@@ -8,63 +8,99 @@ Brings UserReport capabilities in native Android application – Surveys and Aud
 
 Note: UserReport survey functionality is supported from Android SDK 24 or higher
 
-## Usage
+## Installation
 
-Maven:
+### Maven
 ```
 <dependency>
   <groupId>com.audienceproject</groupId>
   <artifactId>userreport</artifactId>
-  <version>[0.0.1.0,)</version>
+  <version>[1.0.0.0,)</version>
 </dependency>
 ```
 
-or Gradle:
+### Gradle
 ```
 dependencies {
   ...
-  compile "com.audienceproject:userreport:0.0.1.+"
+  implementation "com.audienceproject:userreport:1.0.0.0" //or any recent version
 }
 ```
+## Usage
 
-### Screen tracking
-To manually measure the screen view, use the method `userReport.trackScreenView();`.
-Or `userReport.trackSectionScreenView(<SECTION_ID>);` for measuring section screen view.
+### Configuration
+Configure the UserReport instance on Application startup, and make sure you store the instance of UserReport. See example below
 
 ```Java
 import com.audienceproject.userreport.*;
 
-public class MainActivity extends AppCompatActivity {
+public class App extends Application {
+    private UserReport userReport;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate() {
         ...
-
-        UserReport userReport = new UserReportBuilder(<SAK_ID>, <MEDIA_ID>).build(this);
-        userReport.trackScreenView();
+        userReport =
+                UserReport.configure(this,
+                        <SAK_ID>,
+                        <MEDIA_ID>,
+                        null,
+                        null,
+                        null);
+    }
+    public UserReport getUserReport() {
+        return userReport;
     }
 }
 
 ```
+Than at any point of time you can update user information or settings, see example below
+```Java
+public void onLoggedIn(View view) {
+  userReport = App.get().getUserReport();
+  User newUser = new User();
+  newUser.setEmail(userEmail);
+  userReport.updateUser(newUser);
+```
+
+### Screen tracking
+There are two types of tracking *ScreenView* and *SectionScreenView*. One should be used in favor of another depending on the media.   
+
+#### Screen View
+If a media (website) has one topic it can be tracked by using `UserReport.trackScreenView`.
+
+#### Section Screen View
+If a website has different sections, for instance, media has *Health*, *World news*, *Local news* and it should be tracked differenlty `UserReport.trackSectionScreenView(sectionId)` method should be used instead.  
+
+#### Manual invocation
+If `UserReport.trackSectionScreenView` or `UserReport.trackScreenView()` methods invoked by your code, automatic tracking should not be used. 
 
 
-## Configuration
+```Java
+protected void onCreate(Bundle savedInstanceState) {
+  userReport = App.get().getUserReport();
+  userReport.trackScreenView();
+  //or section 
+  userReport.trackSectionScreenView(sectionId);
+}
 
-You can find out `ACCOUNT_ID`, `MEDIA_ID` parameters by following steps:
+```
 
-**If you do not have already created media:**
+#### Automatic tracking
+By default automatic tracking is disabled.  If you enable activity tracking you might want to disable it for specific screens i.e. Settings or Login. Example below.
 
-1. Go to https://app.userreport.com
-2. Go to Media list page
-3. Create a media with type Android App
-4. On the last step you can find out needed parameters
+```Java
+      userReport = App.get().getUserReport();
 
-**If you have already created media:**
+      //false if you don't need it
+      userReport.setAutoTracking(true);
+      
+      ArrayList<String> skipActivities =new ArrayList<>();
+      skipActivities.add(MainActivity.class.getName());
+      // list of activity names can be passed here
+      userReport.skipTrackingFor(skipActivities);
+```
 
-1. Go to https://app.userreport.com
-2. Go to Media list page
-3. Open media in Edit mode
-4. Go to UserReport SDK installation section
 
 ## Build
 
