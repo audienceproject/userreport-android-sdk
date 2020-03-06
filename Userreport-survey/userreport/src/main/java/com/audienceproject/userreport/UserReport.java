@@ -69,6 +69,10 @@ public class UserReport {
         return localInstance;
     }
 
+    public static UserReport configure(Context context, String sakId, String mediaId) {
+        return configure(context, sakId, mediaId, null, null, null);
+    }
+
     private void init() {
         createSession();
         initErrorSubmitter();
