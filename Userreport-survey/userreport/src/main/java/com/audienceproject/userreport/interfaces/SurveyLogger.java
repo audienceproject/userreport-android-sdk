@@ -20,4 +20,10 @@ public interface SurveyLogger {
      * @param ex
      */
     void error(String message, Exception ex);
+
+    /**
+     * Will be called for additional info
+     * @param message
+     */
+    void message(String message);
 }

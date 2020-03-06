@@ -68,6 +68,11 @@ public class MainActivity extends AppCompatActivity {
             public void error(String message, Exception ex) {
                 Log.e("Error in UserReport", message, ex);
             }
+
+            @Override
+            public void message(String message) {
+                Log.v("Message from UserReport", message);
+            }
         };
         userReport.setLogger(logger);
         userReport.setSurveyFinishedCallback(() -> new Handler(Looper.getMainLooper()).post(() ->

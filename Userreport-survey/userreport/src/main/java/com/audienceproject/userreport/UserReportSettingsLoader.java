@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.audienceproject.userreport.interfaces.SurveyLogger;
 import com.audienceproject.userreport.models.MediaSettings;
 import com.audienceproject.userreport.models.Settings;
 import com.google.gson.Gson;
@@ -36,37 +37,41 @@ class UserReportSettingsLoader implements SettingsLoader {
     private ArrayList<SettingsLoadingCallback> callbacks;
     private String sakId;
     private String mediaId;
-    private ErrorsSubmitter errorsSubmitter;
+    private SurveyLogger logger;
     private Settings userSettings;
 
     UserReportSettingsLoader(Context context, String settingsBaseUrl, String sakId, String mediaId,
-                                    ErrorsSubmitter errorsSubmitter, Settings settings) {
+                             SurveyLogger logger, Settings settings) {
         this.application = (Application) context.getApplicationContext();
         this.settingsBaseUrl = settingsBaseUrl;
         this.sakId = sakId;
         this.mediaId = mediaId;
-        this.errorsSubmitter = errorsSubmitter;
+        this.logger = logger;
         this.userSettings = settings;
 
         this.tag = new Date().getTime();
         preferences = application.getSharedPreferences(FILE_NAME, 0);
         this.callbacks = new ArrayList<>();
-
         this.queue = Volley.newRequestQueue(context);
     }
 
     public void registerSettingsLoadCallback(SettingsLoadingCallback callback) {
-        this.callbacks.add(callback);
-        if (this.mediaSettings != null) {
-            callback.onSuccess(this.mediaSettings);
+        callbacks.add(callback);
+        if (mediaSettings != null) {
+            callback.onSuccess(mediaSettings);
         }
+    }
+
+    @Override
+    public void setLogger(SurveyLogger logger) {
+        this.logger = logger;
     }
 
     @Override
     public void load() {
         MediaSettings stored = loadSettingsFromLocals();
         if (stored != null) {
-            this.raiseSettingsLoaded(stored);
+            raiseSettingsLoaded(stored);
         } else {
             loadSAKSettings();
         }
@@ -115,14 +120,14 @@ class UserReportSettingsLoader implements SettingsLoader {
         resultSettings.setToolBarColor(sakSettings.getToolBarColor());
         resultSettings.setSections(sakSettings.getSections());
 
-        this.mediaSettings = resultSettings;
-        for (SettingsLoadingCallback callback : this.callbacks) {
-            callback.onSuccess(this.mediaSettings);
+        mediaSettings = resultSettings;
+        for (SettingsLoadingCallback callback : callbacks) {
+            callback.onSuccess(mediaSettings);
         }
     }
 
     private void raiseSettingsFailed(Exception ex) {
-        for (SettingsLoadingCallback callback : this.callbacks) {
+        for (SettingsLoadingCallback callback : callbacks) {
             callback.onFailed(ex);
         }
     }
@@ -143,21 +148,21 @@ class UserReportSettingsLoader implements SettingsLoader {
     }
 
     private void loadSAKSettings() {
-        final String url = this.generateUrl();
+        final String url = generateUrl();
         StringRequest request = new StringRequest(url,
                 response -> {
                     MediaSettings settings = parseData(response);
                     storeSettingsLocally(response);
-                    UserReportSettingsLoader.this.raiseSettingsLoaded(settings);
+                    raiseSettingsLoaded(settings);
                 },
                 error -> {
-                    errorsSubmitter.logError(error, url);
-                    UserReportSettingsLoader.this.raiseSettingsFailed(error);
+                    logger.error("Request to " + url + " failed", error);
+                    raiseSettingsFailed(error);
                 }
         );
 
-        request.setTag(this.tag);
-        this.queue.add(request);
+        request.setTag(tag);
+        queue.add(request);
     }
 
     private void storeSettingsLocally(String settings) {
@@ -173,6 +178,6 @@ class UserReportSettingsLoader implements SettingsLoader {
     }
 
     private String generateUrl() {
-        return this.settingsBaseUrl + this.sakId + "/media/" + this.mediaId + "/" + SETTINGS_FILE_NAME;
+        return settingsBaseUrl + sakId + "/media/" + mediaId + "/" + SETTINGS_FILE_NAME;
     }
 }

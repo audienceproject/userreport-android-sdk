@@ -1,7 +1,3 @@
 <resources>
     <string name="app_name">Survey</string>
-    <string name="ap_settings_base_url">https://sak.userreport.com/</string>
-    <string name="ap_collect_api_endpoint">https://api.userreport.com/collect/v1/</string>
-    <string name="ap_visit_analytics_base_url">https://visitanalytics.userreport.com/hit.gif?</string>
-    <string name="error_logger_url">https://relay.userreport.com/f/android-sdk-log/json</string>
 </resources>
