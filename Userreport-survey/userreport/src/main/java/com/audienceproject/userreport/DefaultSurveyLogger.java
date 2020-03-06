@@ -15,11 +15,11 @@ class DefaultSurveyLogger implements SurveyLogger {
 
     @Override
     public void error(String message, Exception ex) {
-        Log.e("User Report", message, ex);
+        Log.e("[UserReport]", message, ex);
     }
 
     @Override
     public void message(String message) {
-        Log.v("User Report", message);
+        Log.v("[UserReport]", message);
     }
 }
