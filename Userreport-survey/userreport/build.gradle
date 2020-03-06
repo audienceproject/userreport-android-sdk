@@ -31,7 +31,6 @@ android {
         buildConfigField "String", "AP_SETTINGS_BASE_URL", "\"https://sak.userreport.com/\""
         buildConfigField "String", "AP_COLLECT_API_ENDPOINT", "\"https://api.userreport.com/collect/v1/\""
         buildConfigField "String", "AP_VISIT_ANALYTICS_BASE_URL", "\"https://visitanalytics.userreport.com/hit.gif?\""
-        buildConfigField "String", "ERROR_LOGGER_URL", "\"https://relay.userreport.com/f/android-sdk-log/json\""
     }
 
     sourceSets {
