@@ -31,7 +31,6 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
     private Random rnd;
     private Application applicationContext;
     private List<String> skipActivityWithClasses;
-    private ErrorsSubmitter errorsSubmitter;
 
     private String defaultUserAgent;
     private RequestQueue queue;
@@ -46,13 +45,11 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
 
     InAppEventsTrack(Context context, SettingsLoader settingsLoader,
                      SurveyLogger logger, List<String> skipActivityWithClasses,
-                     ErrorsSubmitter errorsSubmitter, boolean autoTracking,
-                     InvitationProvider invitationProvider) {
+                     boolean autoTracking, InvitationProvider invitationProvider) {
         this.context = context;
         this.settingsLoader = settingsLoader;
         this.logger = logger;
         this.skipActivityWithClasses = skipActivityWithClasses;
-        this.errorsSubmitter = errorsSubmitter;
         this.autoTracking = autoTracking;
         this.invitationProvider = invitationProvider;
 
@@ -64,9 +61,9 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
     }
 
     public void destroy() {
-        if (this.applicationContext != null) {
-            this.applicationContext.unregisterActivityLifecycleCallbacks(this);
-            this.applicationContext = null;
+        if (applicationContext != null) {
+            applicationContext.unregisterActivityLifecycleCallbacks(this);
+            applicationContext = null;
         }
     }
 
@@ -121,8 +118,8 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
     private void checkAAid(Runnable callback) {
         if (!initialized) {
             loadSettings(() -> invitationProvider.createVisit(context, request -> {
-                        InAppEventsTrack.this.aaid = request.userInfo.getAdid();
-                        InAppEventsTrack.this.bundleId = request.media.bundleId;
+                        aaid = request.userInfo.getAdid();
+                        bundleId = request.media.bundleId;
 
                         initialized = true;
 
@@ -138,14 +135,14 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
         settingsLoader.registerSettingsLoadCallback(new SettingsLoadingCallback() {
             @Override
             public void onSuccess(MediaSettings settings) {
-                InAppEventsTrack.this.tCode = settings.getKitTcode();
-                InAppEventsTrack.this.sections = settings.getSections();
+                tCode = settings.getKitTcode();
+                sections = settings.getSections();
                 callback.run();
             }
 
             @Override
             public void onFailed(Exception ex) {
-                InAppEventsTrack.this.logger.error("Failed to load settings", ex);
+                logger.error("Failed to load settings", ex);
             }
         });
     }
@@ -153,14 +150,10 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
     private void raiseTrackingCode(String tCode, String event) {
         if (tCode == null || tCode.equals("")) return;
 
-        final String url = this.composeUrl(tCode, event);
+        final String url = composeUrl(tCode, event);
 
-        StringRequest request = new StringRequest(url, response -> logger.networkActivity("App events tracking", "Ok"
-                , url),
-                error -> {
-                    InAppEventsTrack.this.errorsSubmitter.logError(error, url);
-                    logger.error("App events tracking", error);
-                }
+        StringRequest request = new StringRequest(url, response -> logger.networkActivity("App events tracking", "Ok", url),
+                error -> logger.error("App events tracking", error)
         ) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
@@ -173,13 +166,13 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
                     }
                 }
 
-                result.put("User-Agent", InAppEventsTrack.this.defaultUserAgent);
+                result.put("User-Agent", defaultUserAgent);
 
                 return result;
             }
         };
 
-        this.queue.add(request);
+        queue.add(request);
     }
 
     private String composeUrl(String tCode, String event) {
@@ -188,8 +181,7 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
         String devicePart = getUrlPartData("d=", aaid);
         String mediaPart = getUrlPartData("med=", bundleId);
 
-        String baseUrl = this.applicationContext.getString(R.string.ap_visit_analytics_base_url);
-        String resultUrl = baseUrl + tCodePart + "&" + rndPart + "&" + devicePart + "&" + mediaPart;
+        String resultUrl = BuildConfig.AP_VISIT_ANALYTICS_BASE_URL + tCodePart + "&" + rndPart + "&" + devicePart + "&" + mediaPart;
 
         if (event != null) {
             resultUrl += "&" + getUrlPartData("event=", event);
@@ -204,7 +196,7 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
             try {
                 result = partPrefix + URLEncoder.encode(partData, "UTF8");
             } catch (UnsupportedEncodingException e) {
-                this.logger.error("Error during url part generation.", e);
+                logger.error("Error during url part generation.", e);
                 e.printStackTrace();
 
             }

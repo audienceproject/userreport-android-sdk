@@ -1,11 +1,13 @@
 package com.audienceproject.userreport;
 
+import android.util.Log;
+
 import com.audienceproject.userreport.interfaces.SurveyLogger;
 
 /**
  * Default SurveyLogger
  */
-class SilentLogger implements SurveyLogger {
+class DefaultSurveyLogger implements SurveyLogger {
     @Override
     public void networkActivity(String type, String data, String url) {
 
@@ -13,6 +15,11 @@ class SilentLogger implements SurveyLogger {
 
     @Override
     public void error(String message, Exception ex) {
+        Log.e("[UserReport]", message, ex);
+    }
 
+    @Override
+    public void message(String message) {
+        Log.v("[UserReport]", message);
     }
 }

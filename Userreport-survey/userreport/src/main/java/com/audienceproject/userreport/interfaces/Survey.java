@@ -23,4 +23,6 @@ public interface Survey {
     void setSurveyErrorCallback(SurveyErrorCallback surveyErrorCallback);
 
     void setSurveyOnFinished(SurveyFinishedCallback callback);
+
+    void setLogger(SurveyLogger logger);
 }

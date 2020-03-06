@@ -1,15 +1,14 @@
 package com.audienceproject.userreport;
 
 import android.content.Context;
-import android.util.Log;
 
+import com.audienceproject.userreport.interfaces.Survey;
 import com.audienceproject.userreport.interfaces.SurveyErrorCallback;
 import com.audienceproject.userreport.interfaces.SurveyFinishedCallback;
-import com.audienceproject.userreport.interfaces.Survey;
+import com.audienceproject.userreport.interfaces.SurveyLogger;
 import com.audienceproject.userreport.models.InvitationRequest;
 import com.audienceproject.userreport.models.InvitationResponse;
 import com.audienceproject.userreport.models.Session;
-import com.audienceproject.userreport.models.VisitRequest;
 
 
 /**
@@ -22,10 +21,13 @@ class UserReportSurvey implements Survey {
     private Session session;
     private CollectApiClient collectApiClient;
     private VisitRequestDataProvider invitationProvider;
-    private ErrorsSubmitter errorsSubmitter;
+    private SurveyLogger logger;
     private SurveyFinishedCallback onSurveyFinishedCallback;
     private SurveyErrorCallback surveyErrorCallback;
     private int color;
+    private CustomTabLauncher customTabLauncher;
+    private String userId;
+    private String invitationId;
 
     private boolean surveyInProgress;
 
@@ -33,14 +35,14 @@ class UserReportSurvey implements Survey {
                             CollectApiClient collectApi,
                             String mediaId,
                             int color,
-                            ErrorsSubmitter errorsSubmitter,
+                            SurveyLogger logger,
                             Session session,
                             VisitRequestDataProvider invitationProvider) {
         this.context = context;
         this.collectApiClient = collectApi;
         this.mediaId = mediaId;
         this.color = color;
-        this.errorsSubmitter = errorsSubmitter;
+        this.logger = logger;
         this.session = session;
         this.invitationProvider = invitationProvider;
     }
@@ -54,25 +56,16 @@ class UserReportSurvey implements Survey {
             return false;
         }
         surveyInProgress = true;
-
-        this.invitationProvider.createInvitation(this.context, new VisitRequestReadyCallBack() {
-            CustomTabLauncher v = new CustomTabLauncher(context, color, this::onSurveyClosed, errorsSubmitter);
-
-            String userId;
-            String invitationId;
-
-            @Override
-            public void onReady(VisitRequest request) {
-
+        customTabLauncher = new CustomTabLauncher(context, color, this::onSurveyClosed, logger);
+        this.invitationProvider.createInvitation(this.context, request ->
                 collectApiClient.tryInviteToSurvey((InvitationRequest) request, new InviteCallback() {
                     @Override
                     public void processInviteResult(InvitationResponse response) {
                         if (response.invite) {
                             userId = response.userId;
                             invitationId = response.invitationId;
-
-                            v.loadPage(response.invitationUrl);
-                            Log.i("invitationUrl ", response.invitationUrl);
+                            customTabLauncher.loadPage(response.invitationUrl);
+                            logger.message("invitationUrl - " + response.invitationUrl);
                         } else {
                             surveyInProgress = false;
                         }
@@ -85,27 +78,24 @@ class UserReportSurvey implements Survey {
                         }
                         surveyInProgress = false;
                     }
-                });
-            }
+                }));
+        return true;
+    }
 
-            void onSurveyClosed() {
-                Runnable updateQuarantineFunction = () -> collectApiClient.getQuarantine(userId, mediaId, response -> {
-                    if (response.getInLocal()) {
-                        session.setLocalQuarantineDate(DateConverter.convert(response.getInLocalTill()));
-                    }
-                });
-
-                collectApiClient.setQuarantine("Close", mediaId, invitationId, userId, updateQuarantineFunction);
-
-                if (onSurveyFinishedCallback != null) {
-                    onSurveyFinishedCallback.onFinished();
-                }
-
-                surveyInProgress = false;
+    private void onSurveyClosed() {
+        Runnable updateQuarantineFunction = () -> collectApiClient.getQuarantine(userId, mediaId, response -> {
+            if (response.getInLocal()) {
+                session.setLocalQuarantineDate(DateConverter.convert(response.getInLocalTill()));
             }
         });
 
-        return true;
+        collectApiClient.setQuarantine("Close", mediaId, invitationId, userId, updateQuarantineFunction);
+
+        if (onSurveyFinishedCallback != null) {
+            onSurveyFinishedCallback.onFinished();
+        }
+
+        surveyInProgress = false;
     }
 
     public void destroy() {
@@ -116,5 +106,11 @@ class UserReportSurvey implements Survey {
     @Override
     public void setSurveyErrorCallback(SurveyErrorCallback surveyErrorCallback) {
         this.surveyErrorCallback = surveyErrorCallback;
+    }
+
+    @Override
+    public void setLogger(SurveyLogger logger) {
+        this.logger = logger;
+        if (customTabLauncher!=null) customTabLauncher.setLogger(logger);
     }
 }

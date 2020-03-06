@@ -2,6 +2,7 @@ package com.audienceproject.userreport;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.audienceproject.userreport.interfaces.Survey;
 import com.audienceproject.userreport.interfaces.SurveyErrorCallback;
@@ -37,7 +38,6 @@ public class UserReport {
     private InAppEventsTrack track;
     private Session session;
     private SettingsLoader settingsLoader;
-    private ErrorsSubmitter errorsSubmitter;
     private InvitationProvider invitationProvider;
     private MediaSettings mediaSettings;
     private Survey survey;
@@ -75,10 +75,9 @@ public class UserReport {
 
     private void init() {
         createSession();
-        initErrorSubmitter();
+        initLogger();
         initSettingsLoader();
         initInvoker();
-        initLogger();
         createInvitationProvider();
         initTracker();
         createCollectApiClient();
@@ -92,17 +91,12 @@ public class UserReport {
         session = new Session(prefWrapper);
     }
 
-    private void initErrorSubmitter() {
-        errorsSubmitter = new ErrorsSubmitter(context, context.getString(R.string.error_logger_url));
-    }
-
     private void initSettingsLoader() {
-        String settingsBaseUrl = context.getString(R.string.ap_settings_base_url);
         settingsLoader = new UserReportSettingsLoader(context,
-                settingsBaseUrl,
+                BuildConfig.AP_SETTINGS_BASE_URL,
                 sakId,
                 mediaId,
-                errorsSubmitter,
+                logger,
                 settings);
     }
 
@@ -114,13 +108,13 @@ public class UserReport {
 
     private void initLogger() {
         if (logger == null) {
-            logger = new SilentLogger();
+            logger = new DefaultSurveyLogger();
         }
     }
 
     private void initTracker() {
-        track = new InAppEventsTrack(context, settingsLoader, logger,
-                skipActivityWithClasses, errorsSubmitter, autoTracking, invitationProvider);
+        track = new InAppEventsTrack(context, settingsLoader, logger, skipActivityWithClasses, autoTracking,
+                invitationProvider);
     }
 
     private void createInvitationProvider() {
@@ -128,8 +122,7 @@ public class UserReport {
     }
 
     private void createCollectApiClient() {
-        String collectApiEndpoint = context.getString(R.string.ap_collect_api_endpoint);
-        collectApiClient = new CollectApiClient(collectApiEndpoint, context, logger);
+        collectApiClient = new CollectApiClient(BuildConfig.AP_COLLECT_API_ENDPOINT, context, logger);
         collectApiClient.setTestMode(testMode);
     }
 
@@ -143,7 +136,7 @@ public class UserReport {
                         collectApiClient,
                         mediaId,
                         settings.getToolBarColor(),
-                        errorsSubmitter,
+                        logger,
                         session,
                         invitationProvider);
                 survey.setSurveyErrorCallback(onSurveyErrorCallback);
@@ -267,8 +260,11 @@ public class UserReport {
      * @param logger your implementation of logger
      */
     public void setLogger(SurveyLogger logger) {
+        this.logger = logger;
         if (track != null) track.setLogger(logger);
         if (collectApiClient != null) collectApiClient.setLogger(logger);
+        if (survey != null) survey.setLogger(logger);
+        if (settingsLoader != null) settingsLoader.setLogger(logger);
     }
 
     private void checkSakAndMediaId() {
