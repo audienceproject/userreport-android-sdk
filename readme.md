@@ -1,12 +1,11 @@
 # UserReport Android SDK
 
-Brings UserReport capabilities to native Android application – Surveys and Audience Measurement
+Brings UserReport capabilities to native Android applications – Surveys and Audience Measurement
 
 ## Requirements
 
-- Android SDK 19 (Android 4.4) or higher
-
-Note: UserReport survey functionality is supported from Android SDK 24 or higher
+- For screen/section tracking: Android SDK 19 (Android 4.4) or higher
+- For surveying: Android SDK 24 or higher
 
 ## Installation
 
@@ -29,7 +28,7 @@ dependencies {
 ## Usage
 
 ### Configuration
-Configure the UserReport instance on Application startup, and make sure you store the instance of UserReport. See example below
+Configure the UserReport instance on Application startup, and make sure you store the instance of UserReport. See example below:
 
 ```Java
 import com.audienceproject.userreport.*;
@@ -54,50 +53,64 @@ public class App extends Application {
 }
 
 ```
-Than at any point of time you can update user information or settings, see example below
+
+### Surveying
+At any point in time you can update user information or settings, see example below:
 ```Java
 public void onLoggedIn(View view) {
   userReport = App.get().getUserReport();
   User newUser = new User();
   newUser.setEmail(userEmail);
   userReport.updateUser(newUser);
+}
 ```
 
 ### Screen tracking
-There are two types of tracking *ScreenView* and *SectionScreenView*. One should be used in favor of another depending on the media.   
+There are two types of tracking:
+  - Screen view tracking (`UserReport.trackScreenView`)
+  - Section view tracking (`UserReport.trackSectionScreenView`)
 
-#### Screen View
-If a media (website) has one topic it can be tracked by using `UserReport.trackScreenView`.
-
-#### Section Screen View
-If a website has different sections, for instance, media has *Health*, *World news*, *Local news* and it should be tracked differenlty `UserReport.trackSectionScreenView(sectionId)` method should be used instead.  
-
-#### Manual invocation
-If `UserReport.trackSectionScreenView` or `UserReport.trackScreenView()` methods invoked by your code, automatic tracking should not be used. 
-
+#### Screen view tracking
+If a media (website) has one single topic, it can be tracked by using `UserReport.trackScreenView`.
 
 ```Java
 protected void onCreate(Bundle savedInstanceState) {
   userReport = App.get().getUserReport();
+
+  //track screen view
   userReport.trackScreenView();
-  //or section 
+}
+```
+
+#### Section view tracking
+If a website has different sections, for instance *Health*, *World news* and *Local news*, then it should be tracked using `UserReport.trackSectionScreenView(sectionId)`. The `sectionId` for a particular section can be found on the Media Setting page in UserReport.
+
+```Java
+protected void onCreate(Bundle savedInstanceState) {
+  userReport = App.get().getUserReport();
+
+  //track section view
   userReport.trackSectionScreenView(sectionId);
 }
-
 ```
 
 #### Automatic tracking
-By default automatic tracking is disabled.  If you enable activity tracking you might want to disable it for specific screens i.e. Settings or Login. Example below.
+By default, automatic tracking is disabled.
+
+Also, if the `UserReport.trackSectionScreenView` or `UserReport.trackScreenView` methods are invoked by your code, automatic tracking should normally not be used. However, you can enable automatic tracking by following the example below.
+
+When using automatic activity tracking, you might want to disable it for specific screens i.e. your Settings or Login screens. This is also included in the example below.
 
 ```Java
       userReport = App.get().getUserReport();
 
-      //false if you don't need it
+      //enable automatic tracking (use 'false' if you don't need it)
       userReport.setAutoTracking(true);
-      
+
+      //do not auto-track certain activities
       ArrayList<String> skipActivities =new ArrayList<>();
       skipActivities.add(MainActivity.class.getName());
-      // list of activity names can be passed here
+      // list of other activity names can be passed here
       userReport.skipTrackingFor(skipActivities);
 ```
 
