@@ -26,7 +26,7 @@ public class UserReport {
     private Context context;
     private SurveyInvoker invoker;
     private List<String> skipActivityWithClasses = new ArrayList<>();
-    private boolean autoTracking = true;
+    private boolean autoTracking = false;
     private SurveyLogger logger;
     private boolean testMode = false;
 

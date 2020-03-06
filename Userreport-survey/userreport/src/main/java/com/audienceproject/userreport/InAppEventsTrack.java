@@ -77,9 +77,9 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
     @Override
     public void onActivityStarted(Activity activity) {
         // Skip tracking on application start because it is already tracked in UserReportBuilder
-        if (appStartTracked) {
+        if (autoTracking && appStartTracked) {
             String className = activity.getLocalClassName();
-            if (autoTracking && !skipActivityWithClasses.contains(className)) {
+            if (!skipActivityWithClasses.contains(className)) {
                 trackScreenView(null);
             }
         }
