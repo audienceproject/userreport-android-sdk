@@ -27,7 +27,7 @@ public class UserReport {
     private Context context;
     private SurveyInvoker invoker;
     private List<String> skipActivityWithClasses = new ArrayList<>();
-    private boolean autoTracking = true;
+    private boolean autoTracking = false;
     private SurveyLogger logger;
     private boolean testMode = false;
 
@@ -67,6 +67,10 @@ public class UserReport {
             }
         }
         return localInstance;
+    }
+
+    public static UserReport configure(Context context, String sakId, String mediaId) {
+        return configure(context, sakId, mediaId, null, null, null);
     }
 
     private void init() {

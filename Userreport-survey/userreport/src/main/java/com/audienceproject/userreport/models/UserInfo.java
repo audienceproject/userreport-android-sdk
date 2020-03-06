@@ -1,9 +1,12 @@
 package com.audienceproject.userreport.models;
+import android.text.TextUtils;
+import com.audienceproject.userreport.HashingHelper;
 
 /**
- * POJO model describing user
+ * When email is passed to the class we rely on our hashing procedure because user may forget to
+ * lowercase or trim the email. Though we leave ability to user set hashes by their own in case they
+ * don't want provide us email (email is not sent to the server).
  */
-
 public class UserInfo {
     private String adid;
     private String email;
@@ -18,6 +21,16 @@ public class UserInfo {
         this.emailMd5 = user.getEmailMd5();
         this.emailSha1 = user.getEmailSha1();
         this.emailSha256 = user.getEmailSha256();
+        UpdateHashedEmails();
+    }
+
+    private void UpdateHashedEmails(){
+        if(!TextUtils.isEmpty(this.email)){
+            String normalizedEmail = this.email.trim().toLowerCase();
+            this.emailMd5 = HashingHelper.MD5(normalizedEmail);
+            this.emailSha1 = HashingHelper.SHA1(normalizedEmail);
+            this.emailSha256 = HashingHelper.SHA256(normalizedEmail);
+        }
     }
 
     public String getAdid() {
@@ -28,12 +41,9 @@ public class UserInfo {
         this.adid = adid;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
     public void setEmail(String email) {
         this.email = email;
+        UpdateHashedEmails();
     }
 
     public String getEmailMd5() {

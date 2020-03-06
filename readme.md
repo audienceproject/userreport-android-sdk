@@ -1,70 +1,113 @@
 # UserReport Android SDK
 
-Brings UserReport capabilities in native Android application – Surveys and Audience Measurement
+Brings UserReport capabilities to native Android applications – Surveys and Audience Measurement
 
 ## Requirements
 
-- Android SDK 19 (Android 4.4) or higher
+- For screen/section tracking: Android SDK 19 (Android 4.4) or higher
+- For surveying: Android SDK 24 or higher
 
-Note: UserReport survey functionality is supported from Android SDK 24 or higher
+## Installation
 
-## Usage
-
-Maven:
+### Maven
 ```
 <dependency>
   <groupId>com.audienceproject</groupId>
   <artifactId>userreport</artifactId>
-  <version>[0.0.1.0,)</version>
+  <version>[1.0.0.0,)</version>
 </dependency>
 ```
 
-or Gradle:
+### Gradle
 ```
 dependencies {
   ...
-  compile "com.audienceproject:userreport:0.0.1.+"
+  implementation "com.audienceproject:userreport:1.0.0.0" //or any recent version
 }
 ```
+## Usage
 
-### Screen tracking
-To manually measure the screen view, use the method `userReport.trackScreenView();`.
-Or `userReport.trackSectionScreenView(<SECTION_ID>);` for measuring section screen view.
+### Configuration
+Configure the UserReport instance on Application startup, and make sure you store the instance of UserReport. See example below:
 
 ```Java
 import com.audienceproject.userreport.*;
 
-public class MainActivity extends AppCompatActivity {
+public class App extends Application {
+    private UserReport userReport;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate() {
         ...
-
-        UserReport userReport = new UserReportBuilder(<SAK_ID>, <MEDIA_ID>).build(this);
-        userReport.trackScreenView();
+        userReport = UserReport.configure(this, <SAK_ID>, <MEDIA_ID>);
+    }
+    public UserReport getUserReport() {
+        return userReport;
     }
 }
 
 ```
 
+### Surveying
+At any point in time you can update user information or settings, see example below:
+```Java
+public void onLoggedIn(View view) {
+  userReport = App.get().getUserReport();
+  User newUser = new User();
+  newUser.setEmail(userEmail);
+  userReport.updateUser(newUser);
+}
+```
 
-## Configuration
+### Screen tracking
+There are two types of tracking:
+  - Screen view tracking (`UserReport.trackScreenView`)
+  - Section view tracking (`UserReport.trackSectionScreenView`)
 
-You can find out `ACCOUNT_ID`, `MEDIA_ID` parameters by following steps:
+#### Screen view tracking
+If a media (website) has one single topic, it can be tracked by using `UserReport.trackScreenView`.
 
-**If you do not have already created media:**
+```Java
+protected void onCreate(Bundle savedInstanceState) {
+  userReport = App.get().getUserReport();
 
-1. Go to https://app.userreport.com
-2. Go to Media list page
-3. Create a media with type Android App
-4. On the last step you can find out needed parameters
+  //track screen view
+  userReport.trackScreenView();
+}
+```
 
-**If you have already created media:**
+#### Section view tracking
+If a website has different sections, for instance *Health*, *World news* and *Local news*, then it should be tracked using `UserReport.trackSectionScreenView(sectionId)`. The `sectionId` for a particular section can be found on the Media Setting page in UserReport.
 
-1. Go to https://app.userreport.com
-2. Go to Media list page
-3. Open media in Edit mode
-4. Go to UserReport SDK installation section
+```Java
+protected void onCreate(Bundle savedInstanceState) {
+  userReport = App.get().getUserReport();
+
+  //track section view
+  userReport.trackSectionScreenView(sectionId);
+}
+```
+
+#### Automatic tracking
+By default, automatic tracking is disabled.
+
+Also, if the `UserReport.trackSectionScreenView` or `UserReport.trackScreenView` methods are invoked by your code, automatic tracking should normally not be used. However, you can enable automatic tracking by following the example below.
+
+When using automatic activity tracking, you might want to disable it for specific screens i.e. your Settings or Login screens. This is also included in the example below.
+
+```Java
+      userReport = App.get().getUserReport();
+
+      //enable automatic tracking (use 'false' if you don't need it)
+      userReport.setAutoTracking(true);
+
+      //do not auto-track certain activities
+      ArrayList<String> skipActivities =new ArrayList<>();
+      skipActivities.add(MainActivity.class.getName());
+      // list of other activity names can be passed here
+      userReport.skipTrackingFor(skipActivities);
+```
+
 
 ## Build
 
