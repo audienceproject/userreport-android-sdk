@@ -2,6 +2,11 @@ package com.audienceproject.userreport.models;
 import android.text.TextUtils;
 import com.audienceproject.userreport.HashingHelper;
 
+/**
+ * When email is passed to the class we rely on our hashing procedure because user may forget to
+ * lowercase or trim the email. Though we leave ability to user set hashes by their own in case they
+ * don't want provide us email (email is not sent to the server).
+ */
 public class UserInfo {
     private String adid;
     private String email;
