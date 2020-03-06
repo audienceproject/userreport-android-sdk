@@ -43,10 +43,7 @@ public class App extends Application {
         userReport =
                 UserReport.configure(this,
                         <SAK_ID>,
-                        <MEDIA_ID>,
-                        null,
-                        null,
-                        null);
+                        <MEDIA_ID>);
     }
     public UserReport getUserReport() {
         return userReport;
