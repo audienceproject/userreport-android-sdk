@@ -39,10 +39,7 @@ public class App extends Application {
     @Override
     public void onCreate() {
         ...
-        userReport =
-                UserReport.configure(this,
-                        <SAK_ID>,
-                        <MEDIA_ID>);
+        userReport = UserReport.configure(this, <SAK_ID>, <MEDIA_ID>);
     }
     public UserReport getUserReport() {
         return userReport;
