@@ -8,7 +8,12 @@ Brings UserReport capabilities to native Android applications – Surveys and Au
 - For surveying: Android SDK 24 or higher
 
 ## Installation
-1. Add audienceprojct as dependency to your project
+1. Add audienceprojct as a dependency to your project. See examples for Maven and Gradle below
+
+2. Add audienceproject into the proguard-rules.pro so it won't be obfuscated (*app/proguard-rules.pro*)
+```
+-keep class com.audienceproject.userreport.models.** { *; }
+```
 ### Maven
 ```
 <dependency>
@@ -25,10 +30,7 @@ dependencies {
   implementation "com.audienceproject:userreport:1.0.0.0" //or any recent version
 }
 ```
-2. Add audienceproject into proguard-rules.pro so it won't be obfuscated (*app/proguard-rules.pro*)
-```
--keep class com.audienceproject.userreport.models.** { *; }
-```
+
 
 
 ## Usage
