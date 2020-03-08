@@ -14,7 +14,7 @@ Brings UserReport capabilities to native Android applications – Surveys and Au
 ```
 -keep class com.audienceproject.userreport.models.** { *; }
 ```
-3. SDK relies on **AAID** so you need to add your [AdMob ID](https://support.google.com/admob/answer/7356431) to [*AndroidManifest.xml*](https://developers.google.com/admob/android/quick-start)
+3. SDK relies on **AAID** so you need to add your [AdMob ID](https://support.google.com/admob/answer/7356431) to [*AndroidManifest.xml*](https://developers.google.com/admob/android/quick-start#update_your_androidmanifestxml)
 
 ### Maven
 ```
