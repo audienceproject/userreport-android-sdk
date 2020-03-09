@@ -10,13 +10,7 @@ Brings UserReport capabilities to native Android applications – Surveys and Au
 ## Installation
 1. Add audienceprojct as a dependency to your project. See examples for Maven and Gradle below
 
-2. Add audienceproject into the proguard-rules.pro so it won't be obfuscated (*app/proguard-rules.pro*)
-```
--keep class com.audienceproject.userreport.models.** { *; }
-```
-3. SDK relies on **AAID** so you need to add your [AdMob ID](https://support.google.com/admob/answer/7356431) to [*AndroidManifest.xml*](https://developers.google.com/admob/android/quick-start#update_your_androidmanifestxml)
-
-### Maven
+##### Maven
 ```
 <dependency>
   <groupId>com.audienceproject</groupId>
@@ -25,13 +19,33 @@ Brings UserReport capabilities to native Android applications – Surveys and Au
 </dependency>
 ```
 
-### Gradle
+##### Gradle
 ```
 dependencies {
   ...
   implementation "com.audienceproject:userreport:1.0.0.0" //or any recent version
 }
 ```
+
+2. Add audienceproject into the proguard-rules.pro so it won't be obfuscated (*app/proguard-rules.pro*)
+```
+-keep class com.audienceproject.userreport.models.** { *; }
+```
+3. SDK relies on **AAID** so you need to add your [AdMob ID](https://support.google.com/admob/answer/7356431) to [*AndroidManifest.xml*](https://developers.google.com/admob/android/quick-start#update_your_androidmanifestxml)
+
+```
+<manifest>
+    <application>
+        <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy"/>
+    </application>
+</manifest>
+```
+
+
+
 
 
 
