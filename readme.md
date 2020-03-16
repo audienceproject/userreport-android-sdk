@@ -102,6 +102,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
 #### Section view tracking
 If a website has different sections, for instance *Health*, *World news* and *Local news*, then it should be tracked using `UserReport.trackSectionScreenView(sectionId)`. The `sectionId` for a particular section can be found on the Media Setting page in UserReport.
+Even when `UserReport.trackSectionScreenView(sectionId)` is used, `UserReport.trackScreenView()` should be invoked as well.
 
 ```Java
 protected void onCreate(Bundle savedInstanceState) {
