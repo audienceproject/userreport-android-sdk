@@ -12,6 +12,7 @@ public class MediaSettings extends Settings {
     private String kitTcode;
     private int toolBarColor;
     private Map<String, String> sections;
+    private String hardcodedConsent;
 
     public String getCompanyId() {
         return companyId;
@@ -43,5 +44,13 @@ public class MediaSettings extends Settings {
 
     public void setSections(Map<String, String> sections) {
         this.sections = sections;
+    }
+
+    public String getHardcodedConsent() {
+        return hardcodedConsent;
+    }
+
+    public void setHardcodedConsent(String hardcodedConsent) {
+        this.hardcodedConsent = hardcodedConsent;
     }
 }
