@@ -39,6 +39,7 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
     private SurveyLogger logger;
     private InvitationProvider invitationProvider;
     private Map<String, String> sections;
+    private String hardcodedConsent;
     private boolean initialized;
     private boolean autoTracking;
     private boolean appStartTracked;
@@ -137,6 +138,7 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
             public void onSuccess(MediaSettings settings) {
                 tCode = settings.getKitTcode();
                 sections = settings.getSections();
+                hardcodedConsent = settings.getHardcodedConsent();
                 callback.run();
             }
 
@@ -185,6 +187,10 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
 
         if (event != null) {
             resultUrl += "&" + getUrlPartData("event=", event);
+        }
+
+        if (hardcodedConsent != null) {
+            resultUrl += "&" + getUrlPartData("iab_consent=", hardcodedConsent);
         }
 
         return resultUrl;

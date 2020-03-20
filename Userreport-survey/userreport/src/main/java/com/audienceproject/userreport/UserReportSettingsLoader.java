@@ -119,6 +119,7 @@ class UserReportSettingsLoader implements SettingsLoader {
         resultSettings.setKitTcode(sakSettings.getKitTcode());
         resultSettings.setToolBarColor(sakSettings.getToolBarColor());
         resultSettings.setSections(sakSettings.getSections());
+        resultSettings.setHardcodedConsent(sakSettings.getHardcodedConsent());
 
         mediaSettings = resultSettings;
         for (SettingsLoadingCallback callback : callbacks) {
