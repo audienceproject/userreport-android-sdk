@@ -31,7 +31,27 @@ dependencies {
 ```
 -keep class com.audienceproject.userreport.models.** { *; }
 ```
-3. SDK relies on **AAID** so you need to add your [AdMob ID](https://support.google.com/admob/answer/7356431) to [*AndroidManifest.xml*](https://developers.google.com/admob/android/quick-start#update_your_androidmanifestxml)
+3. SDK relies on **AAID**. In order to get it app needs **AdMob** or **Google Ad Manager**. If you your app doesn't use AdMob stick to the Google Ad Manager instructions. 
+
+
+###### Google Ad Manager
+Declare that your app is an Ad Manager app by adding the following <meta-data> tag in your [*AndroidManifest.xml*](https://developers.google.com/ad-manager/mobile-ads-sdk/android/quick-start#update_your_androidmanifestxml)
+
+```
+<manifest>
+    <application>
+        <meta-data
+            android:name="com.google.android.gms.ads.AD_MANAGER_APP"
+            android:value="true"/>
+    </application>
+</manifest>
+```
+
+
+###### Admob
+Add your [AdMob App ID](https://support.google.com/admob/answer/7356431) to your app's `AndroidManifest.xml` file by adding a `<meta-data>` tag with name `com.google.android.gms.ads.APPLICATION_ID`, as shown below.
+
+You can find your **App ID** in the AdMob UI. For `android:value` insert your own AdMob App ID in quotes, as shown below.
 
 ```
 <manifest>
@@ -42,12 +62,7 @@ dependencies {
             android:value="ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy"/>
     </application>
 </manifest>
-```
-
-
-
-
-
+``` 
 
 ## Usage
 

@@ -18,8 +18,12 @@
         </activity>
         <activity android:name=".StubActivity" />
 
+<!--        <meta-data-->
+<!--            android:name="com.google.android.gms.ads.APPLICATION_ID"-->
+<!--            android:value="ca-app-pub-3009546543862516~5494898247" />-->
+
         <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3009546543862516~5494898247" />
+            android:name="com.google.android.gms.ads.AD_MANAGER_APP"
+            android:value="true"/>
     </application>
 </manifest>
