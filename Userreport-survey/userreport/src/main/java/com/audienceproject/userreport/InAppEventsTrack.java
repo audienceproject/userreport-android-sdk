@@ -106,7 +106,7 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
 
     void trackSectionScreenView(String sectionId) {
         checkAAid(() -> {
-            String tCode = sections.get(sectionId);
+            String tCode = sections == null ? null : sections.get(sectionId);
             raiseTrackingCode(tCode, null);
         });
     }
