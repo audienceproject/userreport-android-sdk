@@ -82,7 +82,6 @@ public class UserReport {
         initTracker();
         createCollectApiClient();
         createSurvey();
-        logVisit();
         trackAppStarted();
     }
 
@@ -226,14 +225,6 @@ public class UserReport {
             survey.setSurveyOnFinished(callback);
         }
         onSurveyFinishedCallback = callback;
-    }
-
-    /**
-     * This method sends visit request to backend and user for sure will not be invited to take survey.
-     * You do not need to call this method directly. It will be called when class instantiated.
-     */
-    public void logVisit() {
-        this.invitationProvider.createVisit(this.context, collectApiClient::logVisit);
     }
 
     /**

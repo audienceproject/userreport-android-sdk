@@ -25,8 +25,7 @@ class CollectApiClient {
 
     private long tag;
 
-    private final String invitationUrl = "visit+invitation";
-    private final String visitUrl = "visit";
+    private final String invitationUrl = "invitation";
     private final String testInvitationUrl = "visit+invitation/testinvite";
     private final String quarantineUrl = "quarantine";
 
@@ -41,24 +40,6 @@ class CollectApiClient {
 
     public void setTestMode(boolean isTestModeOn) {
         this.testModeOn = isTestModeOn;
-    }
-
-    public void logVisit(VisitRequest visit) {
-        final String url = this.apiUrl + this.visitUrl;
-
-        final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        final String json = gson.toJson(visit);
-
-        this.logger.networkActivity("Request", json, url);
-
-        GsonRequest gsonRequest = new GsonRequest(Request.Method.POST,
-                url,
-                json,
-                response -> CollectApiClient.this.logger.networkActivity("Response", response, url),
-                error -> CollectApiClient.this.logger.error("Log Visit Response ERROR", error));
-
-        gsonRequest.setTag(this.tag);
-        this.queue.add(gsonRequest);
     }
 
     public void tryInviteToSurvey(InvitationRequest invitation, final InviteCallback callback) {
