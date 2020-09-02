@@ -87,6 +87,9 @@ public class MainActivity extends AppCompatActivity {
         Switch testModeSwitch = findViewById(R.id.switch1);
         testModeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             userReport.setTestMode(isChecked);
+
+            // Uncomment this line to test anonymous tracking
+            // userReport.setAnonymousTracking(isChecked);
         });
 
         this.networkLog = findViewById(R.id.txtServerLog);

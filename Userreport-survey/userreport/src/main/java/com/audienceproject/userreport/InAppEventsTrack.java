@@ -43,16 +43,19 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
     private boolean initialized;
     private boolean autoTracking;
     private boolean appStartTracked;
+    private boolean anonymousTracking;
 
     InAppEventsTrack(Context context, SettingsLoader settingsLoader,
                      SurveyLogger logger, List<String> skipActivityWithClasses,
-                     boolean autoTracking, InvitationProvider invitationProvider) {
+                     boolean autoTracking, InvitationProvider invitationProvider,
+                     boolean anonymousTracking) {
         this.context = context;
         this.settingsLoader = settingsLoader;
         this.logger = logger;
         this.skipActivityWithClasses = skipActivityWithClasses;
         this.autoTracking = autoTracking;
         this.invitationProvider = invitationProvider;
+        this.anonymousTracking = anonymousTracking;
 
         applicationContext = ((Application) context.getApplicationContext());
         rnd = new Random();
@@ -78,7 +81,7 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
         if (autoTracking && appStartTracked) {
             String className = activity.getLocalClassName();
             if (!skipActivityWithClasses.contains(className)) {
-                trackScreenView(null);
+                trackScreenView(null, anonymousTracking);
             }
         }
 
@@ -105,15 +108,15 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
     public void onActivityDestroyed(@NonNull Activity activity) {
     }
 
-    void trackSectionScreenView(String sectionId) {
+    void trackSectionScreenView(String sectionId, boolean anonymousTracking) {
         checkAAid(() -> {
             String tCode = sections == null ? null : sections.get(sectionId);
-            raiseTrackingCode(tCode, null);
+            raiseTrackingCode(tCode, null, anonymousTracking);
         });
     }
 
-    void trackScreenView(String event) {
-        checkAAid(() -> raiseTrackingCode(tCode, event));
+    void trackScreenView(String event, boolean anonymousTracking) {
+        checkAAid(() -> raiseTrackingCode(tCode, event, anonymousTracking));
     }
 
     private void checkAAid(Runnable callback) {
@@ -149,10 +152,10 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
         });
     }
 
-    private void raiseTrackingCode(String tCode, String event) {
+    private void raiseTrackingCode(String tCode, String event, boolean anonymousTracking) {
         if (tCode == null || tCode.equals("")) return;
 
-        final String url = composeUrl(tCode, event);
+        final String url = composeUrl(tCode, event, anonymousTracking);
 
         StringRequest request = new StringRequest(url, response -> logger.networkActivity("App events tracking", "Ok", url),
                 error -> logger.error("App events tracking", error)
@@ -177,13 +180,15 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
         queue.add(request);
     }
 
-    private String composeUrl(String tCode, String event) {
+    private String composeUrl(String tCode, String event, boolean anonymousTracking) {
         String rndPart = "r=" + rnd.nextInt();
         String tCodePart = getUrlPartData("t=", tCode);
-        String devicePart = getUrlPartData("d=", aaid);
+        String devicePart = getUrlPartData("d=", anonymousTracking ? "" : aaid);
         String mediaPart = getUrlPartData("med=", bundleId);
 
-        String resultUrl = BuildConfig.AP_VISIT_ANALYTICS_BASE_URL + tCodePart + "&" + rndPart + "&" + devicePart + "&" + mediaPart;
+        String trackingUrl = anonymousTracking ? BuildConfig.AP_VISIT_ANALYTICS_DO_NOT_TRACK_URL
+                : BuildConfig.AP_VISIT_ANALYTICS_BASE_URL;
+        String resultUrl = trackingUrl + tCodePart + "&" + rndPart + "&" + devicePart + "&" + mediaPart;
 
         if (event != null) {
             resultUrl += "&" + getUrlPartData("event=", event);
