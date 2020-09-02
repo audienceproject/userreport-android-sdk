@@ -104,8 +104,11 @@ public class UserReport {
     }
 
     private void initSettingsLoader() {
+        String settingsUrl = anonymousTracking ? BuildConfig.AP_SETTINGS_BASE_URL_DO_NOT_TRACK
+                : BuildConfig.AP_SETTINGS_BASE_URL;
+
         settingsLoader = new UserReportSettingsLoader(context,
-                BuildConfig.AP_SETTINGS_BASE_URL,
+                settingsUrl,
                 sakId,
                 mediaId,
                 logger,

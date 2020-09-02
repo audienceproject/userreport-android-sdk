@@ -1,5 +1,6 @@
 <resources>
   <string name="ap_settings_base_url">[[[ap_settings_base_url]]]</string>
+  <string name="ap_settings_base_url_do_not_track">[[[ap_settings_base_url_do_not_track]]]</string>
   <string name="ap_collect_api_endpoint">[[[ap_collect_api_endpoint]]]</string>
   <string name="ap_visit_analytics_base_url">[[[ap_visit_analytics_base_url]]]</string>
   <string name="ap_visit_analytics_do_not_track_url">[[[ap_visit_analytics_do_not_track_url]]]</string>
