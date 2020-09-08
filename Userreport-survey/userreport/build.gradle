@@ -29,8 +29,10 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField "String", "AP_SETTINGS_BASE_URL", "\"https://sak.userreport.com/\""
+        buildConfigField "String", "AP_SETTINGS_BASE_URL_DO_NOT_TRACK", "\"https://sak.dnt-userreport.com/\""
         buildConfigField "String", "AP_COLLECT_API_ENDPOINT", "\"https://api.userreport.com/collect/v1/\""
         buildConfigField "String", "AP_VISIT_ANALYTICS_BASE_URL", "\"https://visitanalytics.userreport.com/hit.gif?\""
+        buildConfigField "String", "AP_VISIT_ANALYTICS_DO_NOT_TRACK_URL", "\"https://visitanalytics.dnt-userreport.com/hit.gif?\""
     }
 
     sourceSets {

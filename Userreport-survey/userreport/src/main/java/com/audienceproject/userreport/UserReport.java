@@ -2,7 +2,6 @@ package com.audienceproject.userreport;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.audienceproject.userreport.interfaces.Survey;
 import com.audienceproject.userreport.interfaces.SurveyErrorCallback;
@@ -25,6 +24,7 @@ public class UserReport {
     private Settings settings;
     private User user;
     private Context context;
+    private boolean anonymousTracking;
     private SurveyInvoker invoker;
     private List<String> skipActivityWithClasses = new ArrayList<>();
     private boolean autoTracking = false;
@@ -44,33 +44,45 @@ public class UserReport {
 
 
     private UserReport(Context context, String sakId, String mediaId, User user, Settings settings,
-                       SurveyInvoker invoker) {
+                       SurveyInvoker invoker, Boolean anonymousTracking) {
         this.mediaId = mediaId;
         this.sakId = sakId;
         this.settings = settings;
         this.user = user;
         this.invoker = invoker;
         this.context = context;
+        this.anonymousTracking = anonymousTracking == null ? false : anonymousTracking;
         checkSakAndMediaId();
         init();
     }
 
-    public static UserReport configure(Context context, String sakId, String mediaId, User user, Settings settings,
-                                       SurveyInvoker invoker) {
+    public static UserReport configure(Context context, String sakId, String mediaId, User user,
+                                       Settings settings, SurveyInvoker invoker,
+                                       Boolean anonymousTracking) {
         UserReport localInstance = instance;
         if (localInstance == null) {
             synchronized (UserReport.class) {
                 localInstance = instance;
                 if (localInstance == null) {
-                    instance = localInstance = new UserReport(context, sakId, mediaId, user, settings, invoker);
+                    instance = localInstance = new UserReport(context, sakId, mediaId, user,
+                            settings, invoker, anonymousTracking);
                 }
             }
         }
         return localInstance;
     }
 
+    public static UserReport configure(Context context, String sakId, String mediaId, User user,
+                                       Settings settings, SurveyInvoker invoker) {
+        return configure(context, sakId, mediaId, user, settings, invoker, null);
+    }
+
+    public static UserReport configure(Context context, String sakId, String mediaId, boolean anonymousTracking) {
+        return configure(context, sakId, mediaId, null, null, null, anonymousTracking);
+    }
+
     public static UserReport configure(Context context, String sakId, String mediaId) {
-        return configure(context, sakId, mediaId, null, null, null);
+        return configure(context, sakId, mediaId, null, null, null, null);
     }
 
     private void init() {
@@ -91,8 +103,11 @@ public class UserReport {
     }
 
     private void initSettingsLoader() {
+        String settingsUrl = anonymousTracking ? BuildConfig.AP_SETTINGS_BASE_URL_DO_NOT_TRACK
+                : BuildConfig.AP_SETTINGS_BASE_URL;
+
         settingsLoader = new UserReportSettingsLoader(context,
-                BuildConfig.AP_SETTINGS_BASE_URL,
+                settingsUrl,
                 sakId,
                 mediaId,
                 logger,
@@ -112,8 +127,8 @@ public class UserReport {
     }
 
     private void initTracker() {
-        track = new InAppEventsTrack(context, settingsLoader, logger, skipActivityWithClasses, autoTracking,
-                invitationProvider);
+        track = new InAppEventsTrack(context, settingsLoader, logger, skipActivityWithClasses,
+                autoTracking, invitationProvider, anonymousTracking);
     }
 
     private void createInvitationProvider() {
@@ -191,8 +206,17 @@ public class UserReport {
         invitationProvider = null;
     }
 
+    /**
+     * Do not send user information if anonymous tracking enabled.
+     *
+     * @param anonymousTracking enable/disable anonymous tracking
+     */
+    public void setAnonymousTracking(boolean anonymousTracking) {
+        this.anonymousTracking = anonymousTracking;
+    }
+
     private void trackAppStarted() {
-        track.trackScreenView("app_started");
+        track.trackScreenView("app_started", anonymousTracking);
     }
 
     /**
@@ -233,14 +257,14 @@ public class UserReport {
      * @param sectionId - your selection screen id
      */
     public void trackSectionScreenView(String sectionId) {
-        track.trackSectionScreenView(sectionId);
+        track.trackSectionScreenView(sectionId, anonymousTracking);
     }
 
     /**
      * Manual tracking of screen
      */
     public void trackScreenView() {
-        track.trackScreenView(null);
+        track.trackScreenView(null, anonymousTracking);
     }
 
     /**
