@@ -31,7 +31,7 @@ dependencies {
 ```
 -keep class com.audienceproject.userreport.models.** { *; }
 ```
-3. SDK relies on **AAID**. In order to get it app needs **AdMob** or **Google Ad Manager**. If you your app doesn't use AdMob stick to the Google Ad Manager instructions. 
+3. SDK relies on **AAID**. In order to get it app needs **AdMob** **OR** **Google Ad Manager**. If you your app doesn't use AdMob stick to the Google Ad Manager instructions. 
 
 
 ###### Google Ad Manager
