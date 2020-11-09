@@ -31,7 +31,7 @@ dependencies {
 ```
 -keep class com.audienceproject.userreport.models.** { *; }
 ```
-3. SDK relies on **AAID**. In order to get it app needs **AdMob** **OR** **Google Ad Manager**. If you your app doesn't use AdMob stick to the Google Ad Manager instructions. 
+3. SDK relies on **AAID**. In order to get it app needs **AdMob** **OR** **Google Ad Manager**. If you your app doesn't use AdMob stick to the Google Ad Manager instructions.
 
 
 ###### Google Ad Manager
@@ -62,7 +62,7 @@ You can find your **App ID** in the AdMob UI. For `android:value` insert your ow
             android:value="ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy"/>
     </application>
 </manifest>
-``` 
+```
 
 ## Usage
 
@@ -148,6 +148,14 @@ When using automatic activity tracking, you might want to disable it for specifi
       userReport.skipTrackingFor(skipActivities);
 ```
 
+
+### Anonymous tracking mode
+If anonymous tracking is enabled: all requests will be fired to the do-not-track domain and IDFA will never be sent.
+To enable anonymous mode you can use following method:
+
+```Java
+userReport.setAnonymousTracking(true);
+```
 
 ## Build
 
