@@ -1,3 +1,5 @@
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.audienceproject/userreport/badge.svg)](https://search.maven.org/search?q=g:com.audienceproject%20a:userreport)
+
 # UserReport Android SDK
 
 Brings UserReport capabilities to native Android applications – Surveys and Audience Measurement
@@ -8,7 +10,7 @@ Brings UserReport capabilities to native Android applications – Surveys and Au
 - For surveying: Android SDK 24 or higher
 
 ## Installation
-1. Add audienceprojct as a dependency to your project. See examples for Maven and Gradle below. Please use latest version of SDK. 1.0.0.0 version is specified just as an example. 
+1. Add audienceprojct as a dependency to your project. See examples for Maven and Gradle below. Please use the latest version of SDK. 1.0.0.0 version which is specified here is provided just as an example. 
 
 ##### Maven
 ```
