@@ -153,8 +153,16 @@ class UserReportSettingsLoader implements SettingsLoader {
         StringRequest request = new StringRequest(url,
                 response -> {
                     MediaSettings settings = parseData(response);
-                    storeSettingsLocally(response);
-                    raiseSettingsLoaded(settings);
+                    // Check if sak settings were parsed correctly
+                    if (settings == null) {
+                        Exception exception = new Exception("Can't parse sak settings");
+                        logger.error("Error on sak settings parsing. Loaded sak settings: "
+                                + response, exception);
+                        raiseSettingsFailed(exception);
+                    } else {
+                        storeSettingsLocally(response);
+                        raiseSettingsLoaded(settings);
+                    }
                 },
                 error -> {
                     logger.error("Request to " + url + " failed", error);
