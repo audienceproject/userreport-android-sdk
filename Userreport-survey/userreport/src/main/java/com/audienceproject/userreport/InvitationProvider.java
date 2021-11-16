@@ -67,7 +67,7 @@ class InvitationProvider implements VisitRequestDataProvider {
             request.userInfo = new UserInfo(user);
         }
 
-        request.media.bundleId = this.getPackageFullName(context);
+        request.media.bundleId = this.getPackageName(context);
         request.media.mediaId = this.mediaId;
         request.media.companyId = this.companyId;
 
@@ -111,14 +111,11 @@ class InvitationProvider implements VisitRequestDataProvider {
         return "";
     }
 
-    private String getThisLibraryVersion() {
-        return BuildConfig.VERSION_NAME;
+    private String getPackageName(Context context) {
+        return context.getPackageName();
     }
 
-    private String getPackageFullName(Context context) {
-        String result = context.getPackageName();
-        result = result + " v." + this.getBundleVersion(context);
-
-        return result;
+    private String getThisLibraryVersion() {
+        return BuildConfig.VERSION_NAME;
     }
 }
