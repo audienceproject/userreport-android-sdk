@@ -26,6 +26,7 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
 
     private String tCode;
     private String bundleId;
+    private String appVersion;
     private String aaid;
 
     private Random rnd;
@@ -124,6 +125,7 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
             loadSettings(() -> invitationProvider.createVisit(context, request -> {
                         aaid = request.userInfo.getAdid();
                         bundleId = request.media.bundleId;
+                        appVersion = request.app.version;
 
                         initialized = true;
 
@@ -189,6 +191,10 @@ class InAppEventsTrack implements InAppEventsTracker, Application.ActivityLifecy
         String trackingUrl = anonymousTracking ? BuildConfig.AP_VISIT_ANALYTICS_DO_NOT_TRACK_URL
                 : BuildConfig.AP_VISIT_ANALYTICS_BASE_URL;
         String resultUrl = trackingUrl + tCodePart + "&" + rndPart + "&" + devicePart + "&" + mediaPart;
+
+        if (appVersion != null) {
+            resultUrl += "&" + getUrlPartData("appver=", appVersion);
+        }
 
         if (event != null) {
             resultUrl += "&" + getUrlPartData("event=", event);
