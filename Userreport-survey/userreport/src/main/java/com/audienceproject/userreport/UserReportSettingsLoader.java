@@ -14,6 +14,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 
 /**
@@ -34,7 +36,7 @@ class UserReportSettingsLoader implements SettingsLoader {
     private MediaSettings mediaSettings;
     private String settingsBaseUrl;
 
-    private ArrayList<SettingsLoadingCallback> callbacks;
+    private final Collection<SettingsLoadingCallback> callbacks;
     private String sakId;
     private String mediaId;
     private SurveyLogger logger;
@@ -51,7 +53,7 @@ class UserReportSettingsLoader implements SettingsLoader {
 
         this.tag = new Date().getTime();
         preferences = application.getSharedPreferences(FILE_NAME, 0);
-        this.callbacks = new ArrayList<>();
+        this.callbacks = Collections.synchronizedCollection(new ArrayList<>());
         this.queue = Volley.newRequestQueue(context);
     }
 
@@ -122,15 +124,26 @@ class UserReportSettingsLoader implements SettingsLoader {
         resultSettings.setHardcodedConsent(sakSettings.getHardcodedConsent());
 
         mediaSettings = resultSettings;
-        for (SettingsLoadingCallback callback : callbacks) {
+
+        ArrayList<SettingsLoadingCallback> collectionToCall = copyCallbacksToCall();
+        for (SettingsLoadingCallback callback : collectionToCall) {
             callback.onSuccess(mediaSettings);
         }
     }
 
     private void raiseSettingsFailed(Exception ex) {
-        for (SettingsLoadingCallback callback : callbacks) {
+        ArrayList<SettingsLoadingCallback> collectionToCall = copyCallbacksToCall();
+        for (SettingsLoadingCallback callback : collectionToCall) {
             callback.onFailed(ex);
         }
+    }
+
+    private ArrayList<SettingsLoadingCallback> copyCallbacksToCall() {
+        ArrayList<SettingsLoadingCallback> result;
+        synchronized (callbacks) {
+            result = new ArrayList<>(callbacks);
+        }
+        return result;
     }
 
     private MediaSettings loadSettingsFromLocals() {
