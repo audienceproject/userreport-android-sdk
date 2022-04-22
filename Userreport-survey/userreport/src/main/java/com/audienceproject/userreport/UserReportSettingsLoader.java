@@ -125,23 +125,23 @@ class UserReportSettingsLoader implements SettingsLoader {
 
         mediaSettings = resultSettings;
 
-        ArrayList<SettingsLoadingCallback> collectionToCall = copyCallbacksToCall(callbacks);
+        ArrayList<SettingsLoadingCallback> collectionToCall = copyCallbacksToCall();
         for (SettingsLoadingCallback callback : collectionToCall) {
             callback.onSuccess(mediaSettings);
         }
     }
 
     private void raiseSettingsFailed(Exception ex) {
-        ArrayList<SettingsLoadingCallback> collectionToCall = copyCallbacksToCall(callbacks);
+        ArrayList<SettingsLoadingCallback> collectionToCall = copyCallbacksToCall();
         for (SettingsLoadingCallback callback : collectionToCall) {
             callback.onFailed(ex);
         }
     }
 
-    private ArrayList<SettingsLoadingCallback> copyCallbacksToCall(Collection<SettingsLoadingCallback> collection) {
+    private ArrayList<SettingsLoadingCallback> copyCallbacksToCall() {
         ArrayList<SettingsLoadingCallback> result;
         synchronized (callbacks) {
-            result = new ArrayList<>(collection);
+            result = new ArrayList<>(callbacks);
         }
         return result;
     }
