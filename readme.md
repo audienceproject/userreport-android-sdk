@@ -6,7 +6,7 @@ Brings UserReport capabilities to native Android applications – Surveys and Au
 
 ## Requirements
 
-- For screen/section tracking: Android SDK 19 (Android 4.4) or higher
+- For screen/section tracking: Android SDK 21 or higher
 - For surveying: Android SDK 24 or higher
 
 ## Installation
