@@ -10,7 +10,7 @@ public class AppModel {
     public String sdk;
 
     /**
-     * Version of application inside which sdk running (actually here will be bindleId with version).
+     * Version of application inside which sdk running (actually here will be bundleId with version).
      */
     public String version;
 }
