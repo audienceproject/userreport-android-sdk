@@ -33,24 +33,7 @@ dependencies {
 ```
 -keep class com.audienceproject.userreport.models.** { *; }
 ```
-3. SDK relies on **AAID**. In order to get it app needs **AdMob**.
-
-
-###### Admob
-Add your [AdMob App ID](https://support.google.com/admob/answer/7356431) to your app's `AndroidManifest.xml` file by adding a `<meta-data>` tag with name `com.google.android.gms.ads.APPLICATION_ID`, as shown below.
-
-You can find your **App ID** in the AdMob UI. For `android:value` insert your own AdMob App ID in quotes, as shown below.
-
-```
-<manifest>
-    <application>
-        <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy"/>
-    </application>
-</manifest>
-```
+3. SDK relies on **AAID**. It doesn't use the other parts of Google Mobile Ads and therefore does not need **AdMob**.
 
 ## Usage
 

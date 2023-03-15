@@ -18,9 +18,5 @@
             </intent-filter>
         </activity>
         <activity android:name=".StubActivity" />
-
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3009546543862516~5494898247" />
     </application>
 </manifest>
