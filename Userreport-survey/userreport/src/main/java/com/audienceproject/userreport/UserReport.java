@@ -289,7 +289,7 @@ public class UserReport {
     }
 
     /**
-     * By default autoTracking = true
+     * By default autoTracking = false
      *
      * @param autoTracking
      */
@@ -329,7 +329,7 @@ public class UserReport {
      * AuctionActivity  we will count it,
      * but then user close this activity and MainActivity will be counted, so if you do not want this return to
      * MainActivity as action call this method and
-     * put MainActivity.class.getName() as parameter/
+     * put MainActivity.this.getLocalClassName() as parameter/
      *
      * @param skipActivityWithClasses name of activities you do not want to count.
      * @return UserReportBuilder
